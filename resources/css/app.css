@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@plugin "@tailwindcss/typography";
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+/* Efek Drop Cap untuk Artikel */
+.prose prose-lg max-w-none drop-cap-content {
+    float: left !important;
+    font-size: 5.5rem !important;
+    line-height: 0.8 !important;
+    margin-right: 12px !important;
+    font-family: 'Newsreader', serif !important;
+    font-weight: 700 !important;
+}
+
+/* Reading Progress Bar Animasi */
+.reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background-color: #bb0021;
+    z-index: 100;
+    transition: width 0.2s ease-out;
+}
