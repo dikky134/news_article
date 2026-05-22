@@ -100,8 +100,8 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                             >
                                 <span className={`pb-1 capitalize ${
                                     activePage === item 
-                                        ? 'border-b-2 border-secondary dark:border-amber-500' 
-                                        : 'group-hover:border-b-2 group-hover:border-secondary dark:group-hover:border-amber-500'
+                                        ? 'border-b-2 border-secondary dark:border-secondary' 
+                                        : 'group-hover:border-b-2 group-hover:border-secondary dark:group-hover:border-secondary'
                                 }`}>
                                     {item}
                                 </span>

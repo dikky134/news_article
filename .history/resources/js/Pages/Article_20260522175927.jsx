@@ -71,7 +71,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                             <div className="flex flex-wrap gap-2">
                                 <button
                                     onClick={() => handleFilterChange('category', '')}
-                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary'}`}
+                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-primary text-white border-primary' : 'border-outline-variant hover:bg-secondary hover:border-secondary'}`}
                                 >
                                     ALL TOPICS
                                 </button>
@@ -79,7 +79,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <button
                                         key={cat.id}
                                         onClick={() => handleFilterChange('category', cat.slug)}
-                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary'}`}
+                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary text-white border-primary' : 'border-outline-variant hover:border-secondary'}`}
                                     >
                                         {cat.name}
                                     </button>
@@ -160,7 +160,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                         <h3 className="font-headline-md text-headline-md mb-2 group-hover:text-secondary transition-colors leading-tight uppercase">
                                             {item.title}
                                         </h3>
-                                        <p className="font-body-md text-body-md text-on-surface-variant dark:text-on-primary-container mb-4 line-clamp-2">
+                                        <p className="font-body-md text-body-md text-on-surface-variant mb-4 line-clamp-2">
                                             {item.excerpt}
                                         </p>
                                         <span className="font-label-caps text-[10px] text-outline uppercase">
@@ -188,10 +188,10 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <h3 className="font-headline-md text-headline-md mb-3 group-hover:text-secondary transition-colors uppercase">
                                         {item.title}
                                     </h3>
-                                    <p className="font-body-md text-body-md text-on-surface-variant dark:text-on-primary-container mb-6 line-clamp-3">
+                                    <p className="font-body-md text-body-md text-on-surface-variant mb-6 line-clamp-3">
                                         {item.excerpt}
                                     </p>
-                                    <div className="flex items-center gap-2 text-primary dark:text-on-secondary font-label-caps text-label-caps uppercase tracking-widest font-bold">
+                                    <div className="flex items-center gap-2 text-primary font-label-caps text-label-caps uppercase tracking-widest font-bold">
                                         <span>Read More</span>
                                         <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                                     </div>

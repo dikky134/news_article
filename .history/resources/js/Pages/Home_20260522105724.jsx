@@ -46,7 +46,7 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
 
             {/* Reading Progress Bar */}
             <div 
-                className="fixed top-0 left-0 h-[2px] bg-secondary dark:bg-amber-500 z-[100] transition-all duration-100 ease-out"
+                className="fixed top-0 left-0 h-[2px] bg-secondary z-[100] transition-all duration-100 ease-out"
                 style={{ width: `${scrollProgress}%` }}
             ></div>
 
@@ -54,7 +54,7 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                 {/* Hero Section */}
                 <section className="py-section-gap grid grid-cols-12 gap-gutter items-center border-b border-outline-variant">
                     <div className="col-span-12 lg:col-span-7">
-                        <span className="font-label-caps text-label-caps text-secondary dark:text-amber-500 mb-4 block tracking-[0.3em] font-bold">
+                        <span className="font-label-caps text-label-caps text-secondary mb-4 block tracking-[0.3em] font-bold">
                             ESTABLISHED 2024
                         </span>
 
@@ -67,10 +67,10 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                         </p>
                         
                         <div className="flex gap-4">
-                            <button className="bg-zinc-900 text-white dark:bg-on-secondary dark:text-zinc-900 px-8 py-4 font-label-caps text-label-caps hover:bg-secondary dark:hover:bg-secondary transition-colors duration-300 uppercase tracking-widest font-bold cursor-pointer">
+                            <button className="bg-on-secondary text-primary px-8 py-4 font-label-caps text-label-caps hover:bg-secondary transition-colors duration-300 uppercase tracking-widest font-bold">
                                 Read Today's Edition
                             </button>
-                            <button className="border border-zinc-700 text-zinc-700 dark:border-zinc-300 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-300 px-8 py-4 font-label-caps text-label-caps uppercase tracking-widest font-bold cursor-pointer">
+                            <button className="border border-on-secondary text-on-secondary hover:text-primary px-8 py-4 font-label-caps text-label-caps hover:bg-surface-container transition-colors duration-300 uppercase tracking-widest font-bold">
                                 Browse Archives
                             </button>
                         </div>
@@ -129,7 +129,7 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                                     <h4 className="font-headline-lg text-headline-lg mb-4 group-hover:text-secondary transition-colors uppercase">
                                         {mainHighlight.title}
                                     </h4>
-                                    <p className="font-body-md text-body-md text-slate-700 dark:text-zinc-400 line-clamp-3">
+                                    <p className="font-body-md text-body-md text-label-caps-fixed-dim line-clamp-3">
                                         {mainHighlight.excerpt}
                                     </p>
                                 </Link>
@@ -145,14 +145,14 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                                             <span className="font-label-caps text-label-caps text-secondary uppercase font-bold">
                                                 {item.category?.name}
                                             </span>
-                                            <span className="font-label-caps text-label-caps opacity-60 tracking-wider">
+                                            <span className="font-label-caps text-[11px] text-primary-fixed-dim opacity-60 tracking-wider">
                                                 {calculateMinRead(item)}
                                             </span>
                                         </div>
                                         <h5 className="font-headline-md text-headline-md mb-2 group-hover:text-secondary transition-colors leading-tight uppercase">
                                             {item.title}
                                         </h5>
-                                        <p className="font-body-md text-body-md text-slate-700 dark:text-zinc-400 line-clamp-3">
+                                        <p className="font-body-md text-body-md text-primary-fixed-dim opacity-80 line-clamp-2">
                                             {item.excerpt}
                                         </p>
                                     </Link>

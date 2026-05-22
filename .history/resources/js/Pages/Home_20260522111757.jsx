@@ -46,7 +46,7 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
 
             {/* Reading Progress Bar */}
             <div 
-                className="fixed top-0 left-0 h-[2px] bg-secondary dark:bg-amber-500 z-[100] transition-all duration-100 ease-out"
+                className="fixed top-0 left-0 h-[2px] bg-secondary z-[100] transition-all duration-100 ease-out"
                 style={{ width: `${scrollProgress}%` }}
             ></div>
 
@@ -54,7 +54,7 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                 {/* Hero Section */}
                 <section className="py-section-gap grid grid-cols-12 gap-gutter items-center border-b border-outline-variant">
                     <div className="col-span-12 lg:col-span-7">
-                        <span className="font-label-caps text-label-caps text-secondary dark:text-amber-500 mb-4 block tracking-[0.3em] font-bold">
+                        <span className="font-label-caps text-label-caps text-secondary mb-4 block tracking-[0.3em] font-bold">
                             ESTABLISHED 2024
                         </span>
 

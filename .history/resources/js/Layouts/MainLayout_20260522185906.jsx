@@ -74,13 +74,13 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                             href="/" 
                             className={`relative py-6 transition-colors font-medium flex items-center group ${
                                 activePage === 'home' 
-                                    ? 'text-secondary dark:text-amber-500' 
-                                    : 'text-slate-700 hover:text-secondary dark:text-on-secondary dark:hover:text-amber-500'
+                                    ? 'text-secondary dark:text-secondary' 
+                                    : 'text-slate-700 hover:text-secondary dark:text-on-secondary dark:hover:text-secondary'
                             }`}
                         >
                             <span className={`pb-1 ${
                                 activePage === 'home' 
-                                    ? 'border-b-2 border-secondary dark:border-amber-500' 
+                                    ? 'border-b-2 border-secondary dark:border-secondary' 
                                     : 'group-hover:border-b-2 group-hover:border-secondary dark:group-hover:border-amber-500'
                             }`}>
                                 Home
@@ -94,14 +94,14 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                 href={item === 'articles' ? route('articles.index') : `/${item}`} 
                                 className={`relative py-6 transition-colors font-medium flex items-center group ${
                                     activePage === item 
-                                        ? 'text-secondary dark:text-amber-500' 
-                                        : 'text-primary hover:text-secondary dark:text-on-secondary dark:hover:text-amber-500'
+                                        ? 'text-secondary dark:text-secondary' 
+                                        : 'text-primary hover:text-secondary dark:text-on-secondary dark:hover:text-secondary'
                                 }`}
                             >
                                 <span className={`pb-1 capitalize ${
                                     activePage === item 
-                                        ? 'border-b-2 border-secondary dark:border-amber-500' 
-                                        : 'group-hover:border-b-2 group-hover:border-secondary dark:group-hover:border-amber-500'
+                                        ? 'border-b-2 border-secondary dark:border-secondary' 
+                                        : 'group-hover:border-b-2 group-hover:border-secondary dark:group-hover:border-secondary'
                                 }`}>
                                     {item}
                                 </span>

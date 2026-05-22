@@ -191,7 +191,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <p className="font-body-md text-body-md text-on-surface-variant dark:text-on-primary-container mb-6 line-clamp-3">
                                         {item.excerpt}
                                     </p>
-                                    <div className="flex items-center gap-2 text-primary dark:text-on-secondary font-label-caps text-label-caps uppercase tracking-widest font-bold">
+                                    <div className="flex items-center gap-2 text-primary font-label-caps text-label-caps uppercase tracking-widest font-bold">
                                         <span>Read More</span>
                                         <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                                     </div>

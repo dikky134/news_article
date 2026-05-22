@@ -54,7 +54,7 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                 {/* Hero Section */}
                 <section className="py-section-gap grid grid-cols-12 gap-gutter items-center border-b border-outline-variant">
                     <div className="col-span-12 lg:col-span-7">
-                        <span className="font-label-caps text-label-caps text-secondary dark:text-amber-500 mb-4 block tracking-[0.3em] font-bold">
+                        <span className="font-label-caps text-label-caps text-secondary mb-4 block tracking-[0.3em] font-bold">
                             ESTABLISHED 2024
                         </span>
 

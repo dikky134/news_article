@@ -5,8 +5,8 @@ import MainLayout from '@/Layouts/MainLayout';
 export default function Article({ articles = [], filters = [], categories = [] }) {
     // Logika pemisahan artikel untuk desain Bento
     const featuredArticle = articles[0]; // Artikel paling baru (Besar)
-    const sideArticles = articles.slice(1, 4); // Artikel posisi 2 & 3
-    const bottomArticles = articles.slice(4); // Sisa artikel
+    const sideArticles = articles.slice(1, 3); // Artikel posisi 2 & 3
+    const bottomArticles = articles.slice(3); // Sisa artikel
 
     const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -71,7 +71,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                             <div className="flex flex-wrap gap-2">
                                 <button
                                     onClick={() => handleFilterChange('category', '')}
-                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary'}`}
+                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-secondary text-white border-primary' : 'border-outline-variant hover:bg-secondary hover:border-secondary'}`}
                                 >
                                     ALL TOPICS
                                 </button>
@@ -79,7 +79,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <button
                                         key={cat.id}
                                         onClick={() => handleFilterChange('category', cat.slug)}
-                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary'}`}
+                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary text-white border-primary' : 'border-outline-variant hover:border-primary'}`}
                                     >
                                         {cat.name}
                                     </button>
@@ -87,29 +87,26 @@ export default function Article({ articles = [], filters = [], categories = [] }
                             </div>
                         </div>
 
-                        {/* Custom Date Input (Satu Tanggal Spesifik) */} 
-                        <div className="flex flex-col gap-4 pt-4 border-t border-outline-variant/30 dark:border-zinc-800">
-                            <span className="font-label-caps text-[10px] opacity-40 dark:opacity-60 uppercase tracking-widest dark:text-zinc-400">
-                                Filter by Specific Date
-                            </span>
+                        {/* Custom Date Input (Satu Tanggal Spesifik) */}
+                        <div className="flex flex-col gap-4 pt-4 border-t border-outline-variant/30">
+                            <span className="font-label-caps text-[10px] opacity-40 uppercase tracking-widest">Filter by Specific Date</span>
                             <div className="flex flex-wrap items-center gap-6">
                                 <div className="flex items-center gap-2">
-                                    <label className="font-label-caps text-[11px] text-60 uppercase dark:text-zinc-300">
-                                        Date:
-                                    </label>
+                                    <label className="font-label-caps text-[11px] text-primary/60 uppercase">Date:</label>
                                     <input 
                                         type="date" 
+                                        // Memastikan nilai berupa string murni YYYY-MM-DD, jika berupa objek/kosong diubah ke string kosong
                                         value={(typeof filters.date === 'string') ? filters.date : ''}
                                         onChange={(e) => handleFilterChange('date', e.target.value)}
-                                        className="border border-outline-variant dark:border-zinc-700 px-3 py-1.5 text-xs font-body-md text-slate-800 dark:text-white focus:outline-secondary bg-transparent [color-scheme:light] dark:[color-scheme:dark]"
+                                        className="border border-outline-variant px-3 py-1.5 text-xs font-body-md focus:outline-secondary bg-transparent text-primary"
                                     />
                                 </div>
 
-                                {/* Tombol Reset Tanggal */}
+                                {/* Tombol Reset Tanggal: Hanya muncul jika filters.date benar-benar ada isinya */}
                                 {filters.date && typeof filters.date === 'string' && filters.date !== '' && (
                                     <button
                                         onClick={() => handleFilterChange('date', '')}
-                                        className="font-label-caps text-[10px] bg-error-container text-red-600 dark:bg-red-950/40 dark:text-red-400 px-3 py-1.5 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors uppercase tracking-wider cursor-pointer"
+                                        className="font-label-caps text-[10px] bg-error-container text-red-600 px-3 py-1.5 border border-red-200 hover:bg-red-50 transition-colors uppercase tracking-wider cursor-pointer"
                                     >
                                         Clear Date
                                     </button>
@@ -138,10 +135,10 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <h2 className="font-headline-lg text-headline-lg mb-4 group-hover:text-secondary transition-colors uppercase">
                                         {featuredArticle.title}
                                     </h2>
-                                    <p className="font-body-lg text-body-lg mb-6 line-clamp-2 max-w-3xl text-on-surface-variant dark:text-on-primary-container text-justify">
+                                    <p className="font-body-lg text-body-lg text-on-surface-variant mb-6 line-clamp-2 max-w-3xl text-justify">
                                         {featuredArticle.excerpt}
                                     </p>
-                                    <div className="flex items-center gap-2 text-primary dark:text-on-secondary font-label-caps text-label-caps uppercase tracking-widest">
+                                    <div className="flex items-center gap-2 text-primary font-label-caps text-label-caps uppercase tracking-widest">
                                         <span>Read Full Story</span>
                                         <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                                     </div>
@@ -160,7 +157,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                         <h3 className="font-headline-md text-headline-md mb-2 group-hover:text-secondary transition-colors leading-tight uppercase">
                                             {item.title}
                                         </h3>
-                                        <p className="font-body-md text-body-md text-on-surface-variant dark:text-on-primary-container mb-4 line-clamp-2">
+                                        <p className="font-body-md text-body-md text-on-surface-variant mb-4 line-clamp-2">
                                             {item.excerpt}
                                         </p>
                                         <span className="font-label-caps text-[10px] text-outline uppercase">
@@ -169,6 +166,19 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     </Link>
                                 </article>
                             ))}
+
+                            {/* Ad/Callout Spot */}
+                            <div className="bg-primary-container p-8 flex flex-col justify-center items-start">
+                                <h4 className="font-headline-md text-surface text-headline-md mb-4 leading-tight">
+                                    Support Independent Journalism.
+                                </h4>
+                                <p className="text-on-primary-container font-body-md mb-6">
+                                    Become a member for exclusive access to deep-dive reports and long-form analysis.
+                                </p>
+                                <button className="bg-secondary text-on-secondary px-6 py-2 font-label-caps text-label-caps tracking-widest hover:brightness-110 transition-all font-bold">
+                                    JOIN NOW
+                                </button>
+                            </div>
                         </div>
 
                         {/* Lower Grid Row */}
@@ -188,10 +198,10 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <h3 className="font-headline-md text-headline-md mb-3 group-hover:text-secondary transition-colors uppercase">
                                         {item.title}
                                     </h3>
-                                    <p className="font-body-md text-body-md text-on-surface-variant dark:text-on-primary-container mb-6 line-clamp-3">
+                                    <p className="font-body-md text-body-md text-on-surface-variant mb-6 line-clamp-3">
                                         {item.excerpt}
                                     </p>
-                                    <div className="flex items-center gap-2 text-primary dark:text-on-secondary font-label-caps text-label-caps uppercase tracking-widest font-bold">
+                                    <div className="flex items-center gap-2 text-primary font-label-caps text-label-caps uppercase tracking-widest font-bold">
                                         <span>Read More</span>
                                         <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                                     </div>

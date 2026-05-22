@@ -75,13 +75,13 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                             className={`relative py-6 transition-colors font-medium flex items-center group ${
                                 activePage === 'home' 
                                     ? 'text-secondary dark:text-amber-500' 
-                                    : 'text-slate-700 hover:text-secondary dark:text-on-secondary dark:hover:text-amber-500'
+                                    : 'text-slate-700 hover:text-secondary dark:text-zinc-300 dark:hover:text-amber-400'
                             }`}
                         >
                             <span className={`pb-1 ${
                                 activePage === 'home' 
                                     ? 'border-b-2 border-secondary dark:border-amber-500' 
-                                    : 'group-hover:border-b-2 group-hover:border-secondary dark:group-hover:border-amber-500'
+                                    : 'group-hover:border-b-2 group-hover:border-slate-400 dark:group-hover:border-zinc-500'
                             }`}>
                                 Home
                             </span>
@@ -95,13 +95,13 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                 className={`relative py-6 transition-colors font-medium flex items-center group ${
                                     activePage === item 
                                         ? 'text-secondary dark:text-amber-500' 
-                                        : 'text-primary hover:text-secondary dark:text-on-secondary dark:hover:text-amber-500'
+                                        : 'text-slate-700 hover:text-secondary dark:text-zinc-300 dark:hover:text-amber-400'
                                 }`}
                             >
                                 <span className={`pb-1 capitalize ${
                                     activePage === item 
                                         ? 'border-b-2 border-secondary dark:border-amber-500' 
-                                        : 'group-hover:border-b-2 group-hover:border-secondary dark:group-hover:border-amber-500'
+                                        : 'group-hover:border-b-2 group-hover:border-slate-400 dark:group-hover:border-zinc-500'
                                 }`}>
                                     {item}
                                 </span>
