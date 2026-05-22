@@ -75,13 +75,13 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                             className={`relative py-6 transition-colors font-medium flex items-center group ${
                                 activePage === 'home' 
                                     ? 'text-secondary dark:text-amber-500' 
-                                    : 'text-slate-700 hover:text-secondary dark:text-on-secondary dark:hover:text-amber-500'
+                                    : 'text-slate-700 hover:text-secondary dark:text-zinc-300 dark:hover:text-amber-400'
                             }`}
                         >
                             <span className={`pb-1 ${
                                 activePage === 'home' 
                                     ? 'border-b-2 border-secondary dark:border-amber-500' 
-                                    : 'group-hover:border-b-2 group-hover:border-secondary dark:group-hover:border-amber-500'
+                                    : 'group-hover:border-b-2 group-hover:border-slate-400 dark:group-hover:border-zinc-500'
                             }`}>
                                 Home
                             </span>
@@ -95,13 +95,13 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                 className={`relative py-6 transition-colors font-medium flex items-center group ${
                                     activePage === item 
                                         ? 'text-secondary dark:text-amber-500' 
-                                        : 'text-primary hover:text-secondary dark:text-on-secondary dark:hover:text-amber-500'
+                                        : 'text-slate-700 hover:text-secondary dark:text-zinc-300 dark:hover:text-amber-400'
                                 }`}
                             >
                                 <span className={`pb-1 capitalize ${
                                     activePage === item 
                                         ? 'border-b-2 border-secondary dark:border-amber-500' 
-                                        : 'group-hover:border-b-2 group-hover:border-secondary dark:group-hover:border-amber-500'
+                                        : 'group-hover:border-b-2 group-hover:border-slate-400 dark:group-hover:border-zinc-500'
                                 }`}>
                                     {item}
                                 </span>
@@ -183,7 +183,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
             </main>
 
             {/* Footer */}
-            <footer className="bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-on-secondary w-full px-margin-edge py-16 flex flex-col items-center border-t border-outline-variant bg-surface-container-lowest mt-0,5">
+            <footer className="bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800 w-full px-margin-edge py-16 flex flex-col items-center border-t border-outline-variant bg-surface-container-lowest mt-0,5">
                 <div className="max-w-content-max-width w-full flex flex-col items-center text-center">
                     <div className="font-display-xl text-headline-md mb-8">The Modern Broadsheet</div>
                     <nav className="flex flex-wrap justify-center gap-x-12 gap-y-4 mb-12">
