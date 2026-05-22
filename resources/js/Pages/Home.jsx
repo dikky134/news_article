@@ -67,10 +67,10 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                         </p>
                         
                         <div className="flex gap-4">
-                            <button className="bg-zinc-900 text-white dark:bg-on-secondary dark:text-zinc-900 px-8 py-4 font-label-caps text-label-caps hover:bg-secondary dark:hover:bg-secondary transition-colors duration-300 uppercase tracking-widest font-bold cursor-pointer">
+                            <button className="bg-zinc-900 text-white dark:bg-on-secondary dark:text-zinc-900 px-8 py-4 font-label-caps text-label-caps hover:bg-secondary dark:hover:bg-amber-500 transition-colors duration-300 uppercase tracking-widest font-bold cursor-pointer">
                                 Read Today's Edition
                             </button>
-                            <button className="border border-zinc-700 text-zinc-700 dark:border-zinc-300 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-300 px-8 py-4 font-label-caps text-label-caps uppercase tracking-widest font-bold cursor-pointer">
+                            <button className="border border-zinc-700 text-zinc-700 dark:border-zinc-300 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-on-secondary dark:hover:text-primary transition-colors duration-300 px-8 py-4 font-label-caps text-label-caps uppercase tracking-widest font-bold cursor-pointer">
                                 Browse Archives
                             </button>
                         </div>
@@ -85,11 +85,11 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                             />
                         </div>
                         {/* Floating Choice Box */}
-                        <div className="absolute -bottom-6 -left-6 bg-surface p-6 shadow-sm border border-outline-variant hidden xl:block max-w-[240px]">
-                            <span className="font-label-caps text-[10px] text-secondary font-bold uppercase tracking-[0.2em]">
+                        <div className="absolute -bottom-6 -left-6 bg-surface dark:bg-primary p-6 shadow-sm border border-outline-variant hidden xl:block max-w-[240px]">
+                            <span className="font-label-caps text-[10px] text-secondary dark:text-amber-500 font-bold uppercase tracking-[0.2em]">
                                 EDITORIAL CHOICE
                             </span>
-                            <p className="text-primary font-display-xl text-[18px] mt-2 italic leading-tight font-semibold">
+                            <p className="text-primary dark:text-on-secondary font-display-xl text-[18px] mt-2 italic leading-tight font-semibold">
                                 "The architecture of modern truth requires a new lens."
                             </p>
                         </div>
@@ -126,7 +126,7 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                                             {calculateMinRead(mainHighlight)}
                                         </span>
                                     </div>
-                                    <h4 className="font-headline-lg text-headline-lg mb-4 group-hover:text-secondary transition-colors uppercase">
+                                    <h4 className="font-headline-lg text-headline-lg mb-4 group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors uppercase">
                                         {mainHighlight.title}
                                     </h4>
                                     <p className="font-body-md text-body-md text-slate-700 dark:text-zinc-400 line-clamp-3">
@@ -142,14 +142,14 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                                 <article key={item.id} className="group cursor-pointer border-b border-outline-variant pb-8 last:border-0 last:pb-0">
                                     <Link href={`/articles/${item.slug}`}>
                                         <div className="flex gap-4 mb-2 items-center">
-                                            <span className="font-label-caps text-label-caps text-secondary uppercase font-bold">
+                                            <span className="font-label-caps text-label-caps text-secondary dark:text-amber-500 uppercase font-bold">
                                                 {item.category?.name}
                                             </span>
                                             <span className="font-label-caps text-label-caps opacity-60 tracking-wider">
                                                 {calculateMinRead(item)}
                                             </span>
                                         </div>
-                                        <h5 className="font-headline-md text-headline-md mb-2 group-hover:text-secondary transition-colors leading-tight uppercase">
+                                        <h5 className="font-headline-md text-headline-md mb-2 group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors leading-tight uppercase">
                                             {item.title}
                                         </h5>
                                         <p className="font-body-md text-body-md text-slate-700 dark:text-zinc-400 line-clamp-3">

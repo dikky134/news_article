@@ -123,7 +123,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                         {auth.user ? (
                         <>
                             <div className="flex flex-col items-end">
-                                <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">
+                                <span className="text-[10px] font-bold text-secondary dark:text-amber-500 uppercase tracking-widest">
                                     {auth.user.role} {/* Akan muncul 'admin' atau 'reader' */}
                                 </span>
                                 <span className="text-sm font-medium uppercase tracking-tighter italic">
