@@ -271,6 +271,14 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                 <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsCategoryOpen(false)}></div>
             )}
 
+            <div className="w-full h-0.5 bg-surface-container dark:bg-zinc-800 relative overflow-hidden">
+                <div 
+                    className={`h-full bg-secondary transition-all duration-500 ${
+                        isPageLoading ? 'w-3/4 opacity-100 animate-pulse' : 'w-0 opacity-0'
+                    }`}
+                />
+            </div>
+
             {/* MAIN CONTENT AREA */}
             <main className="max-w-content-max-width mx-auto px-margin-edge py-12 min-h-[60vh] bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800">
                 {isPageLoading ? (

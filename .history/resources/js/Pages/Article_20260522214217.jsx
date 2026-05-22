@@ -71,7 +71,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                             <div className="flex flex-wrap gap-2">
                                 <button
                                     onClick={() => handleFilterChange('category', '')}
-                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary dark:hover:border-amber-500'}`}
+                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-amber-500'}`}
                                 >
                                     ALL TOPICS
                                 </button>
@@ -79,7 +79,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <button
                                         key={cat.id}
                                         onClick={() => handleFilterChange('category', cat.slug)}
-                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary dark:hover:border-amber-500'}`}
+                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-amber-500'}`}
                                     >
                                         {cat.name}
                                     </button>

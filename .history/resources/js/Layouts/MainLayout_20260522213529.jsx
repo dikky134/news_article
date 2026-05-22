@@ -1,6 +1,5 @@
 import { Link, useForm, usePage, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import EditorialSkeleton from '@/Pages/EditorialSkeleton';
 
 export default function MainLayout({ children, activePage, categories = [] }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,8 +13,6 @@ export default function MainLayout({ children, activePage, categories = [] }) {
         return false;
     });
 
-    const [isPageLoading, setIsPageLoading] = useState(false);
-
     useEffect(() => {
         const root = window.document.documentElement;
         if (isDark) {
@@ -26,21 +23,6 @@ export default function MainLayout({ children, activePage, categories = [] }) {
             localStorage.setItem('theme', 'light');
         }
     }, [isDark]);
-
-    useEffect(() => {
-        const startProgress = () => setIsPageLoading(true);
-        const endProgress = () => setIsPageLoading(false);
-
-        // Mendaftarkan event dan menyimpan fungsi pembersihnya
-        const unbindStart = router.on('start', startProgress);
-        const unbindFinish = router.on('finish', endProgress);
-
-        // Bersihkan event listener saat komponen tidak lagi digunakan (unmount)
-        return () => {
-            unbindStart();
-            unbindFinish();
-        };
-    }, []);
 
     const toggleTheme = () => setIsDark(!isDark);
     
@@ -75,7 +57,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
     ];
 
     return (
-        <div className="min-h-screen bg-background text-on-background font-body-md bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800">
+        <div className="min-h-screen bg-background text-on-background font-body-md">
             {/* Header / Navbar */}
             <header className="bg-surface border-b border-outline-variant dark:border-b dark:border-on-secondary dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800 relative z-50">
                 <div className="flex justify-between items-center w-full px-margin-edge max-w-content-max-width mx-auto">
@@ -272,14 +254,8 @@ export default function MainLayout({ children, activePage, categories = [] }) {
             )}
 
             {/* MAIN CONTENT AREA */}
-            <main className="max-w-content-max-width mx-auto px-margin-edge py-12 min-h-[60vh] bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800">
-                {isPageLoading ? (
-                    /* Saat Inertia.js sedang menarik data halaman baru, tampilkan koran tiruan */
-                    <EditorialSkeleton />
-                ) : (
-                    /* Ketika selesai, otomatis render halaman aslinya */
-                    children
-                )}
+            <main className="min-h-[60vh] bg-surface dark:bg-[#121212]">
+                {children}
             </main>
 
             {/* Footer */}

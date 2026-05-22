@@ -137,10 +137,10 @@ export default function Trending({ trendingArticles = [], stats }) {
                                     <h2 className="font-headline-lg text-headline-lg group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors leading-tight uppercase">
                                         {mainFeature.title}
                                     </h2>
-                                    <p className="text-on-surface-variant dark:text-on-primary-container font-body-lg max-w-3xl line-clamp-2">
+                                    <p className="text-on-surface-variant font-body-lg max-w-3xl line-clamp-2">
                                         {mainFeature.excerpt}
                                     </p>
-                                    <div className="dark:text-on-primary-container flex items-center gap-6 mt-4">
+                                    <div className="flex items-center gap-6 mt-4">
                                         <span className="font-label-caps text-[11px] uppercase">
                                             {mainFeature.reading_time}
                                         </span>

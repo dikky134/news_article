@@ -71,46 +71,6 @@ export default function Trending({ trendingArticles = [], stats }) {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
-                    {/* Numbered List (Left Pillar) */}
-                    <section className="md:col-span-4 border-r border-outline-variant pr-gutter">
-                        <div className="space-y-10">
-                            {leftPillar.map((item, index) => (
-                                <Link 
-                                    key={item.id} 
-                                    href={`/articles/${item.slug}`} 
-                                    className="group cursor-pointer block"
-                                >
-                                    <div className="flex items-start gap-4">
-                                        <span className="font-display-xl text-primary dark:text-on-secondary opacity-20 dark:opacity-80 text-headline-lg leading-none">
-                                            {String(index + 2).padStart(2, '0')}
-                                        </span>
-                                        <div>
-                                            <span className="text-secondary dark:text-amber-500 font-label-caps mb-1 block uppercase">
-                                                {item.category?.name}
-                                            </span>
-                                            <h3 className="font-headline-md text-headline-md leading-tight group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors uppercase">
-                                                {item.title}
-                                            </h3>
-                                            <div className="mt-4 flex flex-wrap items-center gap-3 text-on-surface-variant dark:text-on-primary-container">
-                                                <span className="font-label-caps text-[11px] uppercase">
-                                                    {item.reading_time}
-                                                </span>
-                                                <span className="flex items-center gap-1 font-label-caps text-[11px]">
-                                                    <span className="material-symbols-outlined text-sm">mode_comment</span> 
-                                                    {item.comments_count || 0}
-                                                </span>
-                                                <span className="flex items-center gap-1 font-label-caps text-[11px]">
-                                                    <span className="material-symbols-outlined text-sm">visibility</span> 
-                                                    {item.views_count?.toLocaleString() || 0}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-
                     {/* Main Feature Card (Center Content) */}
                     {mainFeature && (
                         <article className="md:col-span-8 group">
@@ -123,24 +83,24 @@ export default function Trending({ trendingArticles = [], stats }) {
                                     />
                                     <div className="absolute inset-0 border border-black/10 pointer-events-none"></div>
                                     <div className="absolute bottom-4 left-4">
-                                        <span className="bg-secondary dark:bg-amber-500 text-on-secondary font-label-caps px-3 py-1 shadow-lg uppercase">
+                                        <span className="bg-secondary text-on-secondary font-label-caps px-3 py-1 shadow-lg uppercase">
                                             TOP TRENDING #01
                                         </span>
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-center gap-4">
-                                        <span className="text-on-surface-variant font-label-caps uppercase font-bold text-primary dark:text-amber-500">BY {mainFeature.user?.name || 'EDITORIAL'}</span>
+                                        <span className="text-on-surface-variant font-label-caps uppercase font-bold text-primary">BY {mainFeature.user?.name || 'EDITORIAL'}</span>
                                         <span className="w-1 h-1 bg-outline-variant rounded-full"></span>
-                                        <span className="text-on-surface-variant dark:text-on-primary-container font-label-caps uppercase">{mainFeature.category?.name}</span>
+                                        <span className="text-on-surface-variant font-label-caps uppercase">{mainFeature.category?.name}</span>
                                     </div>
-                                    <h2 className="font-headline-lg text-headline-lg group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors leading-tight uppercase">
+                                    <h2 className="font-headline-lg text-headline-lg group-hover:text-secondary transition-colors leading-tight uppercase">
                                         {mainFeature.title}
                                     </h2>
-                                    <p className="text-on-surface-variant dark:text-on-primary-container font-body-lg max-w-3xl line-clamp-2">
+                                    <p className="text-on-surface-variant font-body-lg max-w-3xl line-clamp-2">
                                         {mainFeature.excerpt}
                                     </p>
-                                    <div className="dark:text-on-primary-container flex items-center gap-6 mt-4">
+                                    <div className="flex items-center gap-6 mt-4">
                                         <span className="font-label-caps text-[11px] uppercase">
                                             {mainFeature.reading_time}
                                         </span>
@@ -159,6 +119,46 @@ export default function Trending({ trendingArticles = [], stats }) {
                         </article>
                     )}
                 </div>
+
+                {/* Numbered List (Left Pillar) */}
+                <section className="md:col-span-4 border-r border-outline-variant pr-gutter">
+                    <div className="space-y-10">
+                            {leftPillar.map((item, index) => (
+                                <Link 
+                                    key={item.id} 
+                                    href={`/articles/${item.slug}`} 
+                                    className="group cursor-pointer block"
+                                >
+                                    <div className="flex items-start gap-4">
+                                        <span className="font-display-xl text-primary dark:text-on-secondary opacity-20 dark:opacity-80 text-headline-lg leading-none">
+                                            {String(index + 2).padStart(2, '0')}
+                                        </span>
+                                        <div>
+                                            <span className="text-secondary font-label-caps mb-1 block uppercase">
+                                                {item.category?.name}
+                                            </span>
+                                            <h3 className="font-headline-md text-headline-md leading-tight group-hover:text-secondary transition-colors uppercase">
+                                                {item.title}
+                                            </h3>
+                                            <div className="mt-4 flex flex-wrap items-center gap-3 text-on-surface-variant">
+                                                <span className="font-label-caps text-[11px] uppercase">
+                                                    {item.reading_time}
+                                                </span>
+                                                <span className="flex items-center gap-1 font-label-caps text-[11px]">
+                                                    <span className="material-symbols-outlined text-sm">mode_comment</span> 
+                                                    {item.comments_count || 0}
+                                                </span>
+                                                <span className="flex items-center gap-1 font-label-caps text-[11px]">
+                                                    <span className="material-symbols-outlined text-sm">visibility</span> 
+                                                    {item.views_count?.toLocaleString() || 0}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                    </div>
+                </section>
 
                 {/* Secondary Trending Row (Bento Grid Style) */}
                 <div className="mt-section-gap grid grid-cols-1 md:grid-cols-3 gap-gutter">

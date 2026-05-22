@@ -1,6 +1,5 @@
 import { Link, useForm, usePage, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import EditorialSkeleton from '@/Pages/EditorialSkeleton';
 
 export default function MainLayout({ children, activePage, categories = [] }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -75,7 +74,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
     ];
 
     return (
-        <div className="min-h-screen bg-background text-on-background font-body-md bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800">
+        <div className="min-h-screen bg-background text-on-background font-body-md">
             {/* Header / Navbar */}
             <header className="bg-surface border-b border-outline-variant dark:border-b dark:border-on-secondary dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800 relative z-50">
                 <div className="flex justify-between items-center w-full px-margin-edge max-w-content-max-width mx-auto">
@@ -272,15 +271,16 @@ export default function MainLayout({ children, activePage, categories = [] }) {
             )}
 
             {/* MAIN CONTENT AREA */}
-            <main className="max-w-content-max-width mx-auto px-margin-edge py-12 min-h-[60vh] bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800">
-                {isPageLoading ? (
-                    /* Saat Inertia.js sedang menarik data halaman baru, tampilkan koran tiruan */
-                    <EditorialSkeleton />
-                ) : (
-                    /* Ketika selesai, otomatis render halaman aslinya */
-                    children
-                )}
-            </main>
+            <main className="min-h-[60vh] bg-surface dark:bg-[#121212] relative">
+            {isPageLoading && (
+                <div className="absolute inset-0 bg-surface/70 dark:bg-[#121212]/70 flex items-center justify-center z-50">
+                    <span className="font-['Newsreader'] italic text-zinc-500 animate-pulse">
+                        Fetching latest updates...
+                    </span>
+                </div>
+            )}
+            {children}
+        </main>
 
             {/* Footer */}
             <footer className="bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-on-secondary w-full px-margin-edge py-16 flex flex-col items-center border-t border-outline-variant bg-surface-container-lowest mt-0.5">

@@ -123,24 +123,24 @@ export default function Trending({ trendingArticles = [], stats }) {
                                     />
                                     <div className="absolute inset-0 border border-black/10 pointer-events-none"></div>
                                     <div className="absolute bottom-4 left-4">
-                                        <span className="bg-secondary dark:bg-amber-500 text-on-secondary font-label-caps px-3 py-1 shadow-lg uppercase">
+                                        <span className="bg-secondary text-on-secondary font-label-caps px-3 py-1 shadow-lg uppercase">
                                             TOP TRENDING #01
                                         </span>
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-center gap-4">
-                                        <span className="text-on-surface-variant font-label-caps uppercase font-bold text-primary dark:text-amber-500">BY {mainFeature.user?.name || 'EDITORIAL'}</span>
+                                        <span className="text-on-surface-variant font-label-caps uppercase font-bold text-primary">BY {mainFeature.user?.name || 'EDITORIAL'}</span>
                                         <span className="w-1 h-1 bg-outline-variant rounded-full"></span>
-                                        <span className="text-on-surface-variant dark:text-on-primary-container font-label-caps uppercase">{mainFeature.category?.name}</span>
+                                        <span className="text-on-surface-variant font-label-caps uppercase">{mainFeature.category?.name}</span>
                                     </div>
-                                    <h2 className="font-headline-lg text-headline-lg group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors leading-tight uppercase">
+                                    <h2 className="font-headline-lg text-headline-lg group-hover:text-secondary transition-colors leading-tight uppercase">
                                         {mainFeature.title}
                                     </h2>
-                                    <p className="text-on-surface-variant dark:text-on-primary-container font-body-lg max-w-3xl line-clamp-2">
+                                    <p className="text-on-surface-variant font-body-lg max-w-3xl line-clamp-2">
                                         {mainFeature.excerpt}
                                     </p>
-                                    <div className="dark:text-on-primary-container flex items-center gap-6 mt-4">
+                                    <div className="flex items-center gap-6 mt-4">
                                         <span className="font-label-caps text-[11px] uppercase">
                                             {mainFeature.reading_time}
                                         </span>

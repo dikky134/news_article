@@ -75,7 +75,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
     ];
 
     return (
-        <div className="min-h-screen bg-background text-on-background font-body-md bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800">
+        <div className="min-h-screen bg-background text-on-background font-body-md">
             {/* Header / Navbar */}
             <header className="bg-surface border-b border-outline-variant dark:border-b dark:border-on-secondary dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800 relative z-50">
                 <div className="flex justify-between items-center w-full px-margin-edge max-w-content-max-width mx-auto">
@@ -270,6 +270,14 @@ export default function MainLayout({ children, activePage, categories = [] }) {
             {isCategoryOpen && (
                 <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsCategoryOpen(false)}></div>
             )}
+
+            <div className="w-full h-0.5 bg-surface-container dark:bg-zinc-800 relative overflow-hidden">
+                <div 
+                    className={`h-full bg-secondary transition-all duration-500 ${
+                        isPageLoading ? 'w-3/4 opacity-100 animate-pulse' : 'w-0 opacity-0'
+                    }`}
+                />
+            </div>
 
             {/* MAIN CONTENT AREA */}
             <main className="max-w-content-max-width mx-auto px-margin-edge py-12 min-h-[60vh] bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800">

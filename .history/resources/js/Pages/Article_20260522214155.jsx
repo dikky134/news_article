@@ -71,7 +71,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                             <div className="flex flex-wrap gap-2">
                                 <button
                                     onClick={() => handleFilterChange('category', '')}
-                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary dark:hover:border-amber-500'}`}
+                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-amber-500'}`}
                                 >
                                     ALL TOPICS
                                 </button>
@@ -79,7 +79,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <button
                                         key={cat.id}
                                         onClick={() => handleFilterChange('category', cat.slug)}
-                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary dark:hover:border-amber-500'}`}
+                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-amber-500'}`}
                                     >
                                         {cat.name}
                                     </button>
@@ -135,7 +135,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <span className="font-label-caps text-label-caps text-on-surface-variant bg-surface-container px-2 py-1 inline-block mb-3 uppercase">
                                         {featuredArticle.category?.name || 'Uncategorized'}
                                     </span>
-                                    <h2 className="font-headline-lg text-headline-lg mb-4 group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors uppercase">
+                                    <h2 className="font-headline-lg text-headline-lg mb-4 group-hover:text-amber-500 transition-colors uppercase">
                                         {featuredArticle.title}
                                     </h2>
                                     <p className="font-body-lg text-body-lg mb-6 line-clamp-2 max-w-3xl text-on-surface-variant dark:text-on-primary-container text-justify">
