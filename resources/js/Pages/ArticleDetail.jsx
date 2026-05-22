@@ -110,7 +110,7 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                     </h1>
                     <div className="flex flex-col items-center gap-4">
                         <div className="flex flex-wrap justify-center items-center gap-3 font-body-md text-slate-600 dark:text-zinc-400">
-                            <span className="font-bold text-primary dark:text-amber-500 uppercase">
+                            <span className="font-bold text-secondary dark:text-amber-500 uppercase">
                                 By {article.user?.name || article.author_name || 'Editorial Staff'}
                             </span>
                             <span className="w-1 h-1 bg-outline-variant dark:bg-zinc-700 rounded-full"></span>

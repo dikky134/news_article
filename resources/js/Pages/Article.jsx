@@ -40,7 +40,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
 
             {/* Reading Progress Bar */}
             <div 
-                className="fixed top-0 left-0 h-[2px] bg-secondary z-[100] transition-all duration-100 ease-out"
+                className="fixed top-0 left-0 h-[2px] bg-secondary dark:bg-amber-500 z-[100] transition-all duration-100 ease-out"
                 style={{ width: `${scrollProgress}%` }}
             ></div>
 
@@ -50,7 +50,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                     {/* Header Top Section */}
                     <div className="flex justify-between items-end mb-10">
                         <div>
-                            <span className="font-label-caps text-secondary block mb-4 uppercase tracking-[0.3em] text-[12px]">
+                            <span className="font-label-caps text-secondary dark:text-amber-500 block mb-4 uppercase tracking-[0.3em] text-[12px]">
                                 Archive Edition — {new Date().getFullYear()}
                             </span>
                             <h1 className="font-display-xl text-headline-lg md:text-6xl max-w-4xl leading-tight uppercase italic">
@@ -71,7 +71,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                             <div className="flex flex-wrap gap-2">
                                 <button
                                     onClick={() => handleFilterChange('category', '')}
-                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary'}`}
+                                    className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${!filters.category ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-amber-500'}`}
                                 >
                                     ALL TOPICS
                                 </button>
@@ -79,7 +79,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <button
                                         key={cat.id}
                                         onClick={() => handleFilterChange('category', cat.slug)}
-                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-secondary'}`}
+                                        className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${filters.category === cat.slug ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' : 'border-outline-variant hover:border-amber-500'}`}
                                     >
                                         {cat.name}
                                     </button>
@@ -135,7 +135,7 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                     <span className="font-label-caps text-label-caps text-on-surface-variant bg-surface-container px-2 py-1 inline-block mb-3 uppercase">
                                         {featuredArticle.category?.name || 'Uncategorized'}
                                     </span>
-                                    <h2 className="font-headline-lg text-headline-lg mb-4 group-hover:text-secondary transition-colors uppercase">
+                                    <h2 className="font-headline-lg text-headline-lg mb-4 group-hover:text-amber-500 transition-colors uppercase">
                                         {featuredArticle.title}
                                     </h2>
                                     <p className="font-body-lg text-body-lg mb-6 line-clamp-2 max-w-3xl text-on-surface-variant dark:text-on-primary-container text-justify">
@@ -154,10 +154,10 @@ export default function Article({ articles = [], filters = [], categories = [] }
                             {sideArticles.map((item) => (
                                 <article key={item.id} className="group cursor-pointer border-b border-outline-variant pb-6">
                                     <Link href={`/articles/${item.slug}`}>
-                                        <span className="font-label-caps text-label-caps text-secondary mb-2 block uppercase font-bold">
+                                        <span className="font-label-caps text-label-caps text-secondary dark:text-amber-500 mb-2 block uppercase font-bold">
                                             {item.category?.name}
                                         </span>
-                                        <h3 className="font-headline-md text-headline-md mb-2 group-hover:text-secondary transition-colors leading-tight uppercase">
+                                        <h3 className="font-headline-md text-headline-md mb-2 group-hover:text-amber-500 transition-colors leading-tight uppercase">
                                             {item.title}
                                         </h3>
                                         <p className="font-body-md text-body-md text-on-surface-variant dark:text-on-primary-container mb-4 line-clamp-2">
@@ -182,10 +182,10 @@ export default function Article({ articles = [], filters = [], categories = [] }
                                             alt={item.title}
                                         />
                                     </div>
-                                    <span className="font-label-caps text-label-caps text-secondary mb-2 block uppercase font-bold">
+                                    <span className="font-label-caps text-label-caps text-secondary dark:text-amber-500 mb-2 block uppercase font-bold">
                                         {item.category?.name}
                                     </span>
-                                    <h3 className="font-headline-md text-headline-md mb-3 group-hover:text-secondary transition-colors uppercase">
+                                    <h3 className="font-headline-md text-headline-md mb-3 group-hover:text-amber-500 transition-colors uppercase">
                                         {item.title}
                                     </h3>
                                     <p className="font-body-md text-body-md text-on-surface-variant dark:text-on-primary-container mb-6 line-clamp-3">
@@ -222,10 +222,10 @@ export default function Article({ articles = [], filters = [], categories = [] }
                             Showing {articles.length} Articles
                         </span>
                         <div className="flex gap-4">
-                            <button className="border border-outline px-8 py-3 font-label-caps text-label-caps hover:bg-surface-container transition-colors font-bold uppercase">
+                            <button className="border border-outline px-8 py-3 font-label-caps text-label-caps hover:bg-surface-container dark:hover:text-primary transition-colors font-bold uppercase">
                                 Previous
                             </button>
-                            <button className="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps hover:bg-secondary transition-colors font-bold uppercase">
+                            <button className="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps hover:bg-secondary dark:hover:bg-amber-500 transition-colors font-bold uppercase">
                                 Load More
                             </button>
                         </div>
