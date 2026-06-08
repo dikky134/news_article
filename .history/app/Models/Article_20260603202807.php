@@ -32,7 +32,12 @@ class Article extends Model
         
         return ($minutes < 1 ? 1 : $minutes) . ' MIN READ';
     }
-    
+
+    protected $casts = [
+        'allow_comments' => 'boolean',
+        'feature_on_homepage' => 'boolean',
+        'published_at' => 'datetime',
+    ];
     // Relasi ke User
     public function user()
     {

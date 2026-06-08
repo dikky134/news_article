@@ -152,8 +152,7 @@ class ArticleController extends Controller
         
         $query = Article::query()
             ->with(['category', 'user'])
-            ->where('status', 'published')
-            ->where('feature_on_homepage', false);
+            ->where('status', 'published');
             
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
@@ -180,14 +179,14 @@ class ArticleController extends Controller
             ->where('status', 'published')
             ->where('feature_on_homepage', true)
             ->latest()
-            ->take(3) 
+            ->take(3) // Ambil 3 artikel pilihan terbaru
             ->get();
 
         return Inertia::render('Article', [
-            'articles'         => $articles,
+            'articles'   => $articles,
             'featuredArticles' => $featuredArticles,
-            'categories'       => Category::select('id', 'name', 'slug')->get(),
-            'filters'          => [
+            'categories' => Category::select('id', 'name', 'slug')->get(),
+            'filters'    => [
                 'search'   => $search,
                 'category' => $categorySlug->isNotEmpty() ? $categorySlug->toString() : null,
                 'date'     => $request->input('date')
@@ -199,7 +198,8 @@ class ArticleController extends Controller
     {
         $article = Article::where('slug', $slug)
             ->where('status', 'published')
-            ->with(['category', 'user', 'comments.user'])
+            ->where('feature_on_homepage', '1')
+            ->with(['category', 'user'])
             ->firstOrFail();
 
         // Mencatat View
@@ -213,12 +213,13 @@ class ArticleController extends Controller
         $relatedArticles = Article::where('category_id', $article->category_id)
             ->where('id', '!=', $article->id)
             ->where('status', 'published')
+            ->where('feature_on_homepage', '1')
             ->latest()
             ->take(2)
             ->get();
 
         return Inertia::render('ArticleDetail', [
-            'article'         => $article,
+            'article' => $article,
             'relatedArticles' => $relatedArticles
         ]);
     }

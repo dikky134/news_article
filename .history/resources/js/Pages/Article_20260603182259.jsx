@@ -2,16 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 
-export default function Article({articles = [], filters = [], categories = [], featuredArticles = [] }) 
-{   
-    const hasFeatured = featuredArticles && featuredArticles.length > 0;
-    const filteredArticles = hasFeatured 
-        ? articles.filter(art => art.id !== featuredArticles[0].id)
-        : articles;
-
-    const featuredArticle = filteredArticles[0]; // Artikel bento paling besar
-    const sideArticles = filteredArticles.slice(1, 4); // Artikel posisi samping
-    const bottomArticles = filteredArticles.slice(4); // Sisa artikel ke bawah
+export default function Article({articles = [], filters = [], categories = [], featuredArticles }) {
+    // Logika pemisahan artikel untuk desain Bento
+    const featuredArticle = articles[0]; // Artikel paling baru (Besar)
+    const sideArticles = articles.slice(1, 4); // Artikel posisi 2 & 3
+    const bottomArticles = articles.slice(4); // Sisa artikel
 
     const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -41,10 +36,12 @@ export default function Article({articles = [], filters = [], categories = [], f
 
     // --- FUNGSI PEMBANTU UNTUK RESOLUSI URL GAMBAR ---
     const getThumbnailUrl = (thumbnailPath) => {
-        if (!thumbnailPath) return '';
+        if (!thumbnailPath) return defaultPlaceholder;
+        // Jika path diawali dengan http atau https, gunakan langsung
         if (thumbnailPath.startsWith('http://') || thumbnailPath.startsWith('https://')) {
             return thumbnailPath;
         }
+        // Jika path dari storage lokal Laravel, tambahkan prefix /storage/
         return `/storage/${thumbnailPath}`;
     };
 
@@ -171,35 +168,6 @@ export default function Article({articles = [], filters = [], categories = [], f
                         </div>
                     </div>
                 </header>
-
-                {hasFeatured && !filters.category && !filters.search && !filters.date && (
-                    <div className="mb-16 border-4 border-double border-outline-variant dark:border-zinc-800 p-6 bg-zinc-50 dark:bg-zinc-900/30 group">
-                        <Link href={`/articles/${featuredArticles[0].slug}`} className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-                            <div className="md:col-span-7 aspect-[16/9] overflow-hidden border border-outline-variant/30 bg-surface-container">
-                                <img 
-                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-102"
-                                    src={getThumbnailUrl(featuredArticles[0].thumbnail)} 
-                                    alt={featuredArticles[0].title}
-                                />
-                            </div>
-                            <div className="md:col-span-5 flex flex-col justify-center">
-                                <span className="text-[10px] font-bold text-amber-500 dark:text-amber-500 uppercase tracking-[0.25em] mb-3 block">
-                                    ✦ Editor's Choice / Headline
-                                </span>
-                                <h2 className="font-display-xl text-3xl md:text-4xl font-serif mb-4 uppercase leading-tight group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors">
-                                    {featuredArticles[0].title}
-                                </h2>
-                                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6 line-clamp-3 text-justify">
-                                    {featuredArticles[0].excerpt}
-                                </p>
-                                <div className="flex items-center gap-2 text-primary dark:text-on-secondary font-label-caps text-xs uppercase tracking-widest font-bold">
-                                    <span>Read Headline Story</span>
-                                    <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
-                )}
 
                 {articles.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">

@@ -134,6 +134,7 @@ class ArticleController extends Controller
             unset($validated['thumbnail']); 
         }
 
+        // Sempurnakan format slug request
         $validated['slug'] = Str::slug($request->slug);
 
         $article->update($validated);
@@ -152,8 +153,7 @@ class ArticleController extends Controller
         
         $query = Article::query()
             ->with(['category', 'user'])
-            ->where('status', 'published')
-            ->where('feature_on_homepage', false);
+            ->where('status', 'published');
             
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
@@ -175,19 +175,10 @@ class ArticleController extends Controller
 
         $articles = $query->latest()->get();
 
-        $featuredArticles = Article::query()
-            ->with(['category', 'user'])
-            ->where('status', 'published')
-            ->where('feature_on_homepage', true)
-            ->latest()
-            ->take(3) 
-            ->get();
-
         return Inertia::render('Article', [
-            'articles'         => $articles,
-            'featuredArticles' => $featuredArticles,
-            'categories'       => Category::select('id', 'name', 'slug')->get(),
-            'filters'          => [
+            'articles'   => $articles,
+            'categories' => Category::select('id', 'name', 'slug')->get(),
+            'filters'    => [
                 'search'   => $search,
                 'category' => $categorySlug->isNotEmpty() ? $categorySlug->toString() : null,
                 'date'     => $request->input('date')
@@ -199,7 +190,7 @@ class ArticleController extends Controller
     {
         $article = Article::where('slug', $slug)
             ->where('status', 'published')
-            ->with(['category', 'user', 'comments.user'])
+            ->with(['category', 'user'])
             ->firstOrFail();
 
         // Mencatat View
@@ -218,7 +209,7 @@ class ArticleController extends Controller
             ->get();
 
         return Inertia::render('ArticleDetail', [
-            'article'         => $article,
+            'article' => $article,
             'relatedArticles' => $relatedArticles
         ]);
     }

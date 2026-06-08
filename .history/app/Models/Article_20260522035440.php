@@ -17,9 +17,7 @@ class Article extends Model
         'content',
         'excerpt',
         'thumbnail',
-        'status',
-        'allow_comments',
-        'feature_on_homepage'
+        'status'
     ];
 
     protected $appends = ['reading_time'];
@@ -32,7 +30,6 @@ class Article extends Model
         
         return ($minutes < 1 ? 1 : $minutes) . ' MIN READ';
     }
-    
     // Relasi ke User
     public function user()
     {

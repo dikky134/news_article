@@ -206,18 +206,12 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
 
                 <div className="grid grid-cols-12 gap-y-10 lg:gap-gutter relative">
                     
-                    {/* Desktop Sidebar Actions */}
+                    {/* Desktop Sidebar Actions (Tetap disembunyikan di mobile) */}
                     <aside className="hidden lg:block col-span-1 sticky top-32 h-fit mb-10">
                         <div className="flex flex-col gap-8 text-slate-500 dark:text-zinc-400">
                             <button className="hover:text-secondary dark:hover:text-amber-400 transition-colors cursor-pointer"><span className="material-symbols-outlined">share</span></button>
                             <button className="hover:text-secondary dark:hover:text-amber-400 transition-colors cursor-pointer"><span className="material-symbols-outlined">bookmark</span></button>
-                            
-                            {/* Tombol chat hanya muncul jika komentar diaktifkan */}
-                            {article.allow_comments ? (
-                                <button onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })} className="hover:text-secondary dark:hover:text-amber-400 transition-colors cursor-pointer">
-                                    <span className="material-symbols-outlined">chat_bubble</span>
-                                </button>
-                            ) : null}
+                            <button className="hover:text-secondary dark:hover:text-amber-400 transition-colors cursor-pointer"><span className="material-symbols-outlined">chat_bubble</span></button>
                             
                             {auth?.user?.id === 1 && (
                                 <>
@@ -251,7 +245,7 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                             </h3>
 
                             <div className="space-y-4 md:space-y-6">
-                                {/* List Komentar (Tetap dirender agar komentar lama bisa dibaca meskipun fitur dinonaktifkan sekarang) */}
+                                {/* List Komentar */}
                                 {article.comments && article.comments.map((comment) => (
                                     <div key={comment.id} className="flex gap-3 md:gap-4 p-4 md:p-6 bg-slate-50 dark:bg-zinc-900/50 border border-outline-variant/20 dark:border-zinc-800">
                                         <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-300 dark:bg-zinc-700 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-zinc-300 uppercase">
@@ -269,40 +263,31 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                                     </div>
                                 ))}
 
-                                {/* Pengecekan Fitur Visibilitas allow_comments */}
-                                {article.allow_comments ? (
-                                    auth.user ? (
-                                        <form onSubmit={submitComment} className="space-y-4 pt-2">
-                                            <textarea 
-                                                name="body" 
-                                                value={data.body}
-                                                onChange={e => setData('body', e.target.value)}
-                                                placeholder="Join the discussion..."
-                                                required
-                                                rows={4}
-                                                className="w-full border border-outline-variant dark:border-zinc-700 bg-transparent p-3 md:p-4 text-sm focus:outline-none focus:border-secondary dark:focus:border-amber-500 text-slate-800 dark:text-zinc-100 placeholder:text-slate-400"
-                                            ></textarea>
+                                {/* Bagian Input Komentar */}
+                                {auth.user ? (
+                                    <form onSubmit={submitComment} className="space-y-4 pt-2">
+                                        <textarea 
+                                            name="body" 
+                                            value={data.body}
+                                            onChange={e => setData('body', e.target.value)}
+                                            placeholder="Join the discussion..."
+                                            required
+                                            rows={4}
+                                            className="w-full border border-outline-variant dark:border-zinc-700 bg-transparent p-3 md:p-4 text-sm focus:outline-none focus:border-secondary dark:focus:border-amber-500 text-slate-800 dark:text-zinc-100 placeholder:text-slate-400"
+                                        ></textarea>
 
-                                            <button 
-                                                type="submit" 
-                                                disabled={processing}
-                                                className="w-full sm:w-auto bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 px-6 py-3 font-label-caps text-xs uppercase tracking-wider font-bold hover:bg-secondary dark:hover:bg-amber-500 dark:hover:text-zinc-900 transition-colors disabled:opacity-50 cursor-pointer"
-                                            >
-                                                {processing ? 'Submitting...' : 'Post Comment'}
-                                            </button>
-                                        </form>
-                                    ) : (
-                                        <div className="p-6 bg-slate-50 dark:bg-zinc-900/30 border border-outline-variant dark:border-zinc-800 text-center">
-                                            <p className="font-['Newsreader'] italic mb-3 text-sm md:text-base text-slate-600 dark:text-zinc-400">Please sign in to join the conversation.</p>
-                                            <Link href="/login" className="font-bold text-xs uppercase underline decoration-secondary dark:decoration-amber-500 underline-offset-4 dark:text-zinc-200">Sign In Now</Link>
-                                        </div>
-                                    )
+                                        <button 
+                                            type="submit" 
+                                            disabled={processing}
+                                            className="w-full sm:w-auto bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 px-6 py-3 font-label-caps text-xs uppercase tracking-wider font-bold hover:bg-secondary dark:hover:bg-amber-500 dark:hover:text-zinc-900 transition-colors disabled:opacity-50 cursor-pointer"
+                                        >
+                                            {processing ? 'Submitting...' : 'Post Comment'}
+                                        </button>
+                                    </form>
                                 ) : (
-                                    /* Tampilan jika komentar dinonaktifkan */
-                                    <div className="p-6 bg-amber-500/10 border border-amber-500/20 text-center rounded-sm">
-                                        <p className="font-['Newsreader'] italic text-sm md:text-base text-amber-600 dark:text-amber-400">
-                                            Comments have been disabled for this article.
-                                        </p>
+                                    <div className="p-6 bg-slate-50 dark:bg-zinc-900/30 border border-outline-variant dark:border-zinc-800 text-center">
+                                        <p className="font-['Newsreader'] italic mb-3 text-sm md:text-base text-slate-600 dark:text-zinc-400">Please sign in to join the conversation.</p>
+                                        <Link href="/login" className="font-bold text-xs uppercase underline decoration-secondary dark:decoration-amber-500 underline-offset-4 dark:text-zinc-200">Sign In Now</Link>
                                     </div>
                                 )}
                             </div>
@@ -341,13 +326,9 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
             <div className="lg:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-8 shadow-xl border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-zinc-400">
                 <button className="hover:text-secondary dark:hover:text-amber-400 transition-colors flex items-center"><span className="material-symbols-outlined text-[22px]">share</span></button>
                 <button className="hover:text-secondary dark:hover:text-amber-400 transition-colors flex items-center"><span className="material-symbols-outlined text-[22px]">bookmark</span></button>
-                
-                {/* Tombol chat mobile hanya muncul jika komentar diaktifkan */}
-                {article.allow_comments ? (
-                    <button onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })} className="hover:text-secondary dark:hover:text-amber-400 transition-colors flex items-center">
-                        <span className="material-symbols-outlined text-[22px]">chat_bubble</span>
-                    </button>
-                ) : null}
+                <button onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })} className="hover:text-secondary dark:hover:text-amber-400 transition-colors flex items-center">
+                    <span className="material-symbols-outlined text-[22px]">chat_bubble</span>
+                </button>
                 
                 {auth?.user?.id === 1 && (
                     <Link 

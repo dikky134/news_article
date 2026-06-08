@@ -9,21 +9,13 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
 {
     public function create()
     {
-        $drafts = Article::with(['category'])
-            ->where('status', 'draft')
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
-
         return Inertia::render('Create', [
-            'categories' => Category::all(['id', 'name']),
-            'drafts' => $drafts 
+            'categories' => Category::all(['id', 'name'])
         ]);
     }
 
@@ -34,19 +26,12 @@ class ArticleController extends Controller
 
         $rules = [
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|unique:articles,slug|max:255',
             'category_id' => 'required|exists:categories,id',
-            'excerpt' => 'nullable|string',
-            'allow_comments' => 'required|boolean',
-            'feature_on_homepage' => 'required|boolean',
         ];
 
         if ($statusArtikel === 'published') {
             $rules['content'] = 'required|string';
             $rules['thumbnail'] = 'required|image|mimes:jpeg,png,jpg,webp|max:2048';
-        } else {
-            $rules['content'] = 'nullable|string';
-            $rules['thumbnail'] = 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048';
         }
 
         $validated = $request->validate($rules);
@@ -56,14 +41,14 @@ class ArticleController extends Controller
             $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
         }
 
-        $slug = Str::slug($request->slug ?: $request->title);
-
         Article::create([
             'user_id'             => auth()->id(), 
             'category_id'         => $request->category_id,
             'title'               => $request->title,
-            'excerpt'             => $request->excerpt,
-            'slug'                => $slug,
+            'excerpt'             => $request->subheadline, 
+            'slug'                => $statusArtikel === 'draft' 
+                                    ? Str::slug($request->title) . '-' . Str::random(5) 
+                                    : Str::slug($request->title),
             'content'             => $request->content ?? '', 
             'thumbnail'           => $thumbnailPath,
             'status'              => $statusArtikel,
@@ -78,50 +63,23 @@ class ArticleController extends Controller
 
     public function edit(Article $article)
     {
-        if ($article->status === 'draft' && $article->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $drafts = Article::with(['category'])
-            ->where('status', 'draft')
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
-
         return Inertia::render('Create', [
-            'categories' => Category::all(['id', 'name']),
-            'article' => $article,
-            'drafts' => $drafts
+            'categories' => Category::all(),
+            'article' => $article
         ]);
     }
 
     public function update(Request $request, Article $article)
     {
-        $isDraft = filter_var($request->is_draft, FILTER_VALIDATE_BOOLEAN);
-        $statusArtikel = $isDraft ? 'draft' : 'published';
-
-        $rules = [
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => ['required', 'string', 'max:255', Rule::unique('articles', 'slug')->ignore($article->id)],
-            'excerpt' => 'nullable|string',
+            'subheadline' => 'nullable|string|max:255',
+            'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'allow_comments' => 'required|boolean',
             'feature_on_homepage' => 'required|boolean',
-        ];
-
-        if ($statusArtikel === 'published') {
-            $rules['content'] = 'required|string';
-        } else {
-            $rules['content'] = 'nullable|string';
-        }
-
-        $validated = $request->validate($rules);
-        $validated['status'] = $statusArtikel;
-        
-        if ($statusArtikel === 'published') {
-            $validated['published_at'] = $article->published_at ?? now();
-        }
+        ]);
 
         if ($request->hasFile('thumbnail')) {
             if ($article->thumbnail && Storage::disk('public')->exists($article->thumbnail)) {
@@ -134,15 +92,12 @@ class ArticleController extends Controller
             unset($validated['thumbnail']); 
         }
 
-        $validated['slug'] = Str::slug($request->slug);
+        $validated['excerpt'] = $request->subheadline;
 
         $article->update($validated);
 
-        if ($validated['status'] === 'published') {
-            return redirect()->route('articles.index')->with('message', 'Artikel berhasil diperbarui/diterbitkan!');
-        }
-
-        return redirect()->route('articles.create')->with('message', 'Perubahan draf berhasil disimpan!');
+        return redirect()->route('articles.show', $article->slug)
+                        ->with('success', 'Artikel berhasil diperbarui!');
     }
 
     public function index(Request $request)
@@ -152,9 +107,9 @@ class ArticleController extends Controller
         
         $query = Article::query()
             ->with(['category', 'user'])
-            ->where('status', 'published')
-            ->where('feature_on_homepage', false);
+            ->where('status', 'published');
             
+        // Logika Pencarian
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
                 $q->where('title', 'LIKE', "%{$search}%");
@@ -175,19 +130,10 @@ class ArticleController extends Controller
 
         $articles = $query->latest()->get();
 
-        $featuredArticles = Article::query()
-            ->with(['category', 'user'])
-            ->where('status', 'published')
-            ->where('feature_on_homepage', true)
-            ->latest()
-            ->take(3) 
-            ->get();
-
         return Inertia::render('Article', [
-            'articles'         => $articles,
-            'featuredArticles' => $featuredArticles,
-            'categories'       => Category::select('id', 'name', 'slug')->get(),
-            'filters'          => [
+            'articles'   => $articles,
+            'categories' => Category::select('id', 'name', 'slug')->get(),
+            'filters'    => [
                 'search'   => $search,
                 'category' => $categorySlug->isNotEmpty() ? $categorySlug->toString() : null,
                 'date'     => $request->input('date')
@@ -199,7 +145,7 @@ class ArticleController extends Controller
     {
         $article = Article::where('slug', $slug)
             ->where('status', 'published')
-            ->with(['category', 'user', 'comments.user'])
+            ->with(['category', 'user'])
             ->firstOrFail();
 
         // Mencatat View
@@ -218,7 +164,7 @@ class ArticleController extends Controller
             ->get();
 
         return Inertia::render('ArticleDetail', [
-            'article'         => $article,
+            'article' => $article,
             'relatedArticles' => $relatedArticles
         ]);
     }

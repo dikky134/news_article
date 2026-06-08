@@ -301,7 +301,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
             <main className="max-w-content-max-width mx-auto px-4 md:px-margin-edge py-12 w-full overflow-x-hidden">
                 <div className="mb-10 md:mb-12 flex flex-col md:flex-row md:items-end justify-between border-b border-outline-variant pb-6 md:pb-8">
                     <div className="max-w-2xl">
-                        <span className="font-label-caps text-[10px] md:text-label-caps text-secondary dark:text-amber-500 mb-1.5 block tracking-widest">Editorial Dashboard</span>
+                        <span className="font-label-caps text-[10px] md:text-label-caps text-secondary mb-1.5 block tracking-widest">Editorial Dashboard</span>
                         <h1 className="font-headline-lg text-2xl md:text-headline-lg text-primary dark:text-white tracking-tight">
                             {isEditMode ? 'Edit Article / Draft' : 'Compose New Article'}
                         </h1>
@@ -372,7 +372,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
                             <div>
                                 <label className="font-label-caps text-[11px] md:text-label-caps text-on-surface-variant mb-2 block uppercase tracking-widest">Subheadline (Excerpt)</label>
                                 <textarea
-                                    rows="5"
+                                    rows="3"
                                     value={data.excerpt}
                                     onChange={e => setData('excerpt', e.target.value)}
                                     className="w-full font-body-lg text-base md:text-body-lg bg-transparent border-b border-outline focus:border-primary focus:ring-0 px-0 py-2 resize-none transition-colors dark:text-white outline-none placeholder:text-sm" 
@@ -407,16 +407,16 @@ export default function Create({ categories = [], article = null, drafts = [] })
                             <label className="font-label-caps text-[11px] md:text-label-caps text-on-surface-variant mb-4 block uppercase tracking-widest">Article Body</label>
                             <div className="border border-outline-variant bg-surface-container-lowest dark:bg-zinc-900 w-full">
                                 <div className="flex flex-wrap items-center gap-3 md:gap-4 px-3 md:px-4 py-2.5 border-b border-outline-variant bg-surface-container-low dark:bg-zinc-800">
-                                    <button type="button" onClick={() => formatText('paragraf')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Paragraph">format_paragraph</button>
-                                    <button type="button" onClick={() => formatText('bold')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Bold">format_bold</button>
-                                    <button type="button" onClick={() => formatText('italic')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Italic">format_italic</button>
-                                    <button type="button" onClick={() => formatText('underline')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Underline">format_underlined</button>
+                                    <button type="button" onClick={() => formatText('paragraf')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant hover:text-primary dark:hover:text-white" title="Paragraph">format_paragraph</button>
+                                    <button type="button" onClick={() => formatText('bold')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant hover:text-primary dark:hover:text-white" title="Bold">format_bold</button>
+                                    <button type="button" onClick={() => formatText('italic')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant hover:text-primary dark:hover:text-white" title="Italic">format_italic</button>
+                                    <button type="button" onClick={() => formatText('underline')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant hover:text-primary dark:hover:text-white" title="Underline">format_underlined</button>
                                     <div className="w-[1px] h-4 bg-outline-variant mx-1"></div>
-                                    <button type="button" onClick={() => formatText('bullet')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Bullet List">format_list_bulleted</button>
-                                    <button type="button" onClick={() => formatText('number')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Numbered List">format_list_numbered</button>
-                                    <button type="button" onClick={() => formatText('quotes')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Quotes">format_quote</button>
+                                    <button type="button" onClick={() => formatText('bullet')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant hover:text-primary dark:hover:text-white" title="Bullet List">format_list_bulleted</button>
+                                    <button type="button" onClick={() => formatText('number')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant hover:text-primary dark:hover:text-white" title="Numbered List">format_list_numbered</button>
+                                    <button type="button" onClick={() => formatText('quotes')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant hover:text-primary dark:hover:text-white" title="Quotes">format_quote</button>
                                     <div className="w-[1px] h-4 bg-outline-variant mx-1"></div>
-                                    <button type="button" onClick={() => formatText('link')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Insert Link">link</button>
+                                    <button type="button" onClick={() => formatText('link')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant hover:text-primary dark:hover:text-white" title="Insert Link">link</button>
                                 </div>
                                 <textarea 
                                     ref={textareaRef}
@@ -512,7 +512,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
                                     <span className="text-sm dark:text-zinc-300">Allow Comments</span>
                                     <div 
                                         onClick={() => setData('allow_comments', !data.allow_comments)}
-                                        className={`w-10 h-5 rounded-full flex items-center px-1 cursor-pointer transition-colors ${data.allow_comments ? 'bg-secondary dark:bg-amber-500 justify-end' : 'bg-zinc-700 justify-start'}`}
+                                        className={`w-10 h-5 rounded-full flex items-center px-1 cursor-pointer transition-colors ${data.allow_comments ? 'bg-amber-500 justify-end' : 'bg-zinc-700 justify-start'}`}
                                     >
                                         <div className="w-3 h-3 bg-white rounded-full"></div>
                                     </div>
@@ -530,9 +530,9 @@ export default function Create({ categories = [], article = null, drafts = [] })
                         </div>
 
                         {/* Sidebar Daftar Draf Tersimpan */}
-                        <div className="bg-surface-container dark:bg-[#1e1e1e] p-5 border border-zinc-800">
-                            <h3 className="text-xs font-mono tracking-wider uppercase text-secondary dark:text-amber-400 mb-4 flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-secondary dark:bg-amber-500 animate-pulse"></span>
+                        <div className="bg-[#1e1e1e] p-5 border border-zinc-800">
+                            <h3 className="text-xs font-mono tracking-wider uppercase text-amber-400 mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                                 Draf Tersimpan ({drafts.length})
                             </h3>
 

@@ -32,7 +32,6 @@ class Article extends Model
         
         return ($minutes < 1 ? 1 : $minutes) . ' MIN READ';
     }
-    
     // Relasi ke User
     public function user()
     {
