@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
+import Swal from 'sweetalert2';
 
 export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
     const [scrollProgress, setScrollProgress] = useState(0);
@@ -67,6 +68,48 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
         });
     };
 
+    const handleDelete = () => {
+        Swal.fire({
+            title: 'Hapus Artikel?',
+            text: `Artikel "${article.title}" akan dihapus permanen dan tidak dapat dikembalikan.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33', // Warna tombol konfirmasi (Merah)
+            cancelButtonColor: '#3085d6', // Warna tombol batal (Biru)
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            background: document.documentElement.classList.contains('dark') ? '#1e1e1e' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Jalankan proses hapus Inertia jika user menekan "Ya, Hapus!"
+                router.delete(route('articles.destroy', article.id), {
+                    onSuccess: () => {
+                        // Pop-up sukses setelah artikel berhasil terhapus
+                        Swal.fire({
+                            title: 'Terhapus!',
+                            text: 'Artikel Anda telah berhasil dihapus.',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            background: document.documentElement.classList.contains('dark') ? '#1e1e1e' : '#fff',
+                            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+                        });
+                    },
+                    onError: (err) => {
+                        // Pop-up jika terjadi error sistem
+                        Swal.fire({
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menghapus artikel.',
+                            icon: 'error',
+                            confirmButtonColor: '#3085d6',
+                        });
+                        console.error(err);
+                    }
+                });
+            }
+        });
+    }
+
     return (
         <MainLayout activePage={article.category?.slug}>
 
@@ -76,7 +119,7 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
             <style dangerouslySetInnerHTML={{ __html: `
                 .article-body p:first-of-type::first-letter {
                     float: left;
-                    font-size: 4rem; /* Diperkecil di mobile dari 5.5rem agar seimbang */
+                    font-size: 4rem; 
                     line-height: 0.85;
                     padding-right: 0.12em;
                     padding-top: 0.05em;
@@ -88,20 +131,43 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                     .article-body p:first-of-type::first-letter { font-size: 5.5rem; }
                 }
 
-                .article-body p {
+                /* SINKRONISASI UKURAN FONT UTAMA */
+                .article-body p, 
+                .article-body ul, 
+                .article-body ol, 
+                .article-body li {
+                    font-size: 16px !important;
                     margin-bottom: 1.5rem;
                 }
+                @media (min-width: 768px) {
+                    .article-body p, 
+                    .article-body ul, 
+                    .article-body ol, 
+                    .article-body li { 
+                        font-size: 18px !important; 
+                    }
+                }
 
-                .article-body h2 {
+                .article-body h2,
+                .article-body h3,
+                .article-body h4 {
                     font-family: 'Newsreader', serif;
-                    font-size: 22px; /* Lebih bersahabat untuk mobile */
                     font-weight: 600;
                     color: currentColor;
+                    line-height: 1.3;
                     margin-top: 2.5rem;
                     margin-bottom: 1.25rem;
+                    display: block;
                 }
+
+                .article-body h2 { font-size: 24px; }
+                .article-body h3 { font-size: 21px; }
+                .article-body h4 { font-size: 18px; }
+
                 @media (min-width: 768px) {
                     .article-body h2 { font-size: 28px; margin-top: 3rem; }
+                    .article-body h3 { font-size: 26px; margin-top: 3rem; }
+                    .article-body h4 { font-size: 22px; margin-top: 2.5rem; }
                 }
 
                 .article-body blockquote {
@@ -114,47 +180,72 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                     margin-bottom: 2rem;
                     font-style: italic;
                     font-family: 'Newsreader', serif;
-                    font-size: 20px; /* Lebih proporsional di mobile */
+                    font-size: 20px; 
                 }
                 @media (min-width: 768px) {
                     .article-body blockquote { font-size: 28px; padding-left: 2rem; margin-top: 3rem; margin-bottom: 3rem; }
                 }
 
                 .article-body b, .article-body strong {
-                    font-weight: 700;
+                    font-weight: 700 !important;
                     color: currentColor;
                 }
-                .article-body i, .article-body em {
-                    font-style: italic;
-                }
-                .article-body u {
-                    text-decoration: underline;
-                }
-                .article-body ul {
-                    list-style-type: disc !important;
-                    padding-left: 1.5rem;
-                    margin-bottom: 1.5rem;
-                }
-                .article-body ol {
-                    list-style-type: decimal !important;
-                    padding-left: 1.5rem;
-                    margin-bottom: 1.5rem;
-                }
-                .article-body li {
-                    margin-bottom: 0.5rem;
-                    list-style-position: outside;
-                }
+                .article-body i, .article-body em { font-style: italic; }
+                .article-body u { text-decoration: underline; }
                 .article-body a {
                     color: #bb0021;
                     text-decoration: underline;
                     font-weight: 500;
                     transition: color 0.2s ease;
                 }
-                .dark .article-body a {
-                    color: #fbbf24;
+                .dark .article-body a { color: #fbbf24; }
+                .article-body a:hover { opacity: 0.8; }
+                .article-body ul, 
+                .article-body ol {
+                    list-style-type: none !important; /* Matikan bawaan browser */
+                    padding-left: 0 !important;
                 }
-                .article-body a:hover {
-                    opacity: 0.8;
+
+                .article-body ol {
+                    counter-reset: article-list-counter;
+                }
+
+                .article-body li {
+                    position: relative;
+                    padding-left: 1.75rem !important; /* Beri ruang penomoran di kiri */
+                    margin-bottom: 0.75rem !important;
+                    line-height: 1.7 !important;
+                    font-weight: normal !important; /* Standar teks list adalah normal */
+                }
+
+                .article-body ol li::before {
+                    counter-increment: article-list-counter;
+                    content: counter(article-list-counter) ".";
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    font-weight: normal;
+                }
+
+                .article-body ul li::before {
+                    content: "•";
+                    position: absolute;
+                    left: 0.25rem;
+                    top: 0;
+                    font-size: 1.25rem;
+                    line-height: 1.2;
+                    font-weight: normal;
+                }
+
+                .article-body li:has(> strong:first-child)::before,
+                .article-body li:has(> b:first-child)::before {
+                    font-weight: 700 !important;
+                }
+
+                .article-body li strong,
+                .article-body li b {
+                    font-weight: 700 !important;
+                    display: inline;
                 }
             `}} />
             
@@ -229,11 +320,20 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                                     >
                                         <span className="material-symbols-outlined">edit</span>
                                     </Link>
+                                    <button
+                                        onClick={handleDelete}
+                                        type="button"
+                                        className="text-primary dark:text-amber-500 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer flex flex-col items-center gap-1 bg-transparent border-none outline-none"
+                                        title="Hapus Artikel"
+                                    >
+                                        <span className="material-symbols-outlined text-[22px]">
+                                            delete
+                                        </span>
+                                    </button>
                                 </>
                             )}
 
                             <div className="w-full h-[1px] bg-outline-variant dark:bg-zinc-800"></div>
-                            <button className="hover:text-secondary dark:hover:text-amber-400 transition-colors cursor-pointer"><span className="material-symbols-outlined">more_horiz</span></button>
                         </div>
                     </aside>
 

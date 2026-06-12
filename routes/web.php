@@ -47,23 +47,25 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Tampilan Halaman Form Buat Artikel Baru
     Route::get('/create', [ArticleController::class, 'create'])->name('articles.create');
     
-    // MENYIMPAN ARTIKEL BARU 
+    // Menyimpan Artikel Baru (Bisa berupa Publish maupun Draft baru)
     Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
 
-    // Proses Penyimpanan Draf Artikel
-    Route::post('/drafts', [ArticleController::class, 'storeDraft']); 
+    // Proses Auto Save Draft (Interval Berjalan)
+    Route::post('/api/articles/auto-save', [ArticleController::class, 'autoSave'])->name('articles.auto-save');
 
     // Tampilan Halaman Edit Artikel yang sudah ada
     Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
     
-    // UPDATE artikel lama, dan hapus POST /articles/{article} yang double
-    Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
+    // UPDATE Artikel 
+    Route::post('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
 
-    // Route untuk manajemen kategori instan dari halaman artikel
+    // Hapus Artikel
+    Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])->name('articles.destroy');
+
+    // Route manajemen kategori
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 });
-
 
 // ==========================================
 // 4. RUTE PUBLIK (BISA DIAKSES SIAPAPUN)
@@ -86,3 +88,6 @@ Route::get('/about', function () {
 // Route untuk Detail Artikel & Simpan Komentar Publik
 Route::get('/articles/{slug}', [ArticleDetailController::class, 'show'])->name('articles.show');
 Route::post('/comments', [ArticleDetailController::class, 'storeComment'])->name('comments.store');
+
+Route::get('/api/articles/search', [ArticleController::class, 'search'])
+         ->name('articles.search');

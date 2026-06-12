@@ -32,11 +32,25 @@ export default function Article({articles = [], filters = [], categories = [], f
     console.log("Filters aktif:", filters);
     console.log("Jumlah artikel diterima:", articles.length);
     
-    // Logika Filter
+    // --- PERBAIKAN LOGIKA FILTER (Mendukung Clear Filter secara Absolut di URL) ---
     const handleFilterChange = (key, value) => {
-        const newFilters = { ...filters, [key]: value };
-        if (!value) delete newFilters[key];
-        router.get('/articles', newFilters, { preserveState: true });
+        let newFilters = { ...filters };
+
+        if (key === 'RESET_ALL') {
+            // Jika memicu clear filter total, kosongkan objek filter seutuhnya
+            newFilters = {};
+        } else if (!value || value === '') {
+            // Pastikan properti dihapus total agar tidak dikirim sebagai string kosong ke backend
+            delete newFilters[key];
+        } else {
+            newFilters[key] = value;
+        }
+
+        // Paksa Inertia melakukan request ulang ke URL bersih tanpa membawa query parameter usang
+        router.get('/articles', newFilters, { 
+            preserveState: true,
+            replace: true // Mencegah penumpukan riwayat history back browser yang rusak
+        });
     };
 
     // --- FUNGSI PEMBANTU UNTUK RESOLUSI URL GAMBAR ---
@@ -295,22 +309,18 @@ export default function Article({articles = [], filters = [], categories = [], f
                         ))}
                     </div>
                 ) : (
+                    /* --- PERBAIKAN: TOMBOL RESET CLEAR FILTER DISINI --- */
                     <div className="py-24 text-center border border-dashed border-outline-variant">
                         <p className="font-display-md text-on-surface-variant">No articles found in this landscape.</p>
                         <button 
-                            onClick={() => {
-                                handleFilterChange('date', '');
-                                handleFilterChange('category', '');
-                                handleFilterChange('search', '');
-                            }} 
-                            className="text-secondary font-label-caps mt-4 inline-block underline cursor-pointer"
+                            onClick={() => handleFilterChange('RESET_ALL', '')} 
+                            className="text-secondary dark:text-amber-500 font-label-caps mt-4 inline-block underline cursor-pointer hover:opacity-80 transition-opacity"
                         >
-                            Clear filter
+                            Clear all filters
                         </button>
                     </div>
                 )}
 
-                {/* Pagination */}
                 {articles.length > 0 && (
                     <div className="mt-24 border-t border-outline-variant py-12 flex justify-between items-center">
                         <span className="font-label-caps text-label-caps text-on-surface-variant">

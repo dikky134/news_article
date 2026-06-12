@@ -1,10 +1,19 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import Swal from 'sweetalert2';
+import axios from 'axios';
 
 export default function Create({ categories = [], article = null, drafts = [] }) {
     const isEditMode = !!article;
+
+    const [linkModal, setLinkModal] = useState({
+        show: false,
+        url: '',
+        range: null,
+        top: 0,
+        left: 0
+    });
 
     const Toast = Swal.mixin({
         toast: true,
@@ -30,8 +39,60 @@ export default function Create({ categories = [], article = null, drafts = [] })
         thumbnail: null,
         allow_comments: article ? !!article.allow_comments : true,
         feature_on_homepage: article ? !!article.feature_on_homepage : false,
-        is_draft: article?.status === 'draft', 
+        is_draft: article ? article.status === 'draft' : true, 
     });
+
+    const [isSaving, setIsSaving] = useState(false);
+    const [currentArticleId, setCurrentArticleId] = useState(article?.id || null);
+    
+    const editorRef = useRef(null);
+    const debounceTimerRef = useRef(null);
+
+    // Memasukkan teks awal ke dalam editor saat pertama kali halaman dimuat
+    useEffect(() => {
+        if (editorRef.current) {
+            const initialContent = article?.content || data?.content || '<p><br></p>';
+            editorRef.current.innerHTML = initialContent;
+        }
+    }, []);
+
+    // Membersihkan timer saat komponen tidak lagi digunakan (unmount)
+    useEffect(() => {
+        return () => {
+            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+        };
+    }, []);
+
+    // Auto-save logic
+    useEffect(() => {
+        if (!data.title.trim() && (!data.content.trim() || data.content === '<p><br></p>')) return;
+        if (processing) return;
+
+        const autoSaveTimer = setTimeout(() => {
+            setIsSaving(true);
+            
+            const payload = { 
+                ...data, 
+                id: currentArticleId,
+                is_draft: true
+            };
+
+            axios.post('/api/articles/auto-save', payload)
+                .then(response => {
+                    setIsSaving(false);
+                    if (response.data.article_id && !currentArticleId) {
+                        setCurrentArticleId(response.data.article_id);
+                    }
+                    console.log('Auto-save sukses lewat API!');
+                })
+                .catch(error => {
+                    setIsSaving(false);
+                    console.error('Auto-save gagal:', error);
+                });
+        }, 5000);
+
+        return () => clearTimeout(autoSaveTimer);
+    }, [data.title, data.content, data.excerpt, data.category_id]);
 
     const handleTitleChange = (e) => {
         const titleVal = e.target.value;
@@ -48,7 +109,6 @@ export default function Create({ categories = [], article = null, drafts = [] })
         });
     };
 
-    // Manual Edit untuk Slug
     const handleSlugChange = (e) => {
         const slugVal = e.target.value
             .toLowerCase()
@@ -69,95 +129,154 @@ export default function Create({ categories = [], article = null, drafts = [] })
     const [newCategoryName, setNewCategoryName] = useState('');
     const [categoryError, setCategoryError] = useState('');
 
-    const textareaRef = useRef(null);
-    const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
-    const [linkUrl, setLinkUrl] = useState('https://');
-    const [savedSelection, setSavedSelection] = useState({ start: 0, end: 0 });
+    // Menggunakan Debounce untuk mencegah kursor melompat saat menghapus/mengetik
+    const handleEditorChange = () => {
+        if (!editorRef.current) return;
 
-    const handleInsertLink = (e) => {
+        const allSpans = editorRef.current.querySelectorAll('span');
+        allSpans.forEach(span => {
+            if (span.hasAttribute('style')) {
+                span.removeAttribute('style');
+            }
+            if (!span.hasAttribute('class') && span.tagName.toLowerCase() === 'span') {
+                const textNode = document.createTextNode(span.textContent);
+                span.parentNode.replaceChild(textNode, span);
+            }
+        });
+
+        const allLis = editorRef.current.querySelectorAll('li');
+        allLis.forEach(li => {
+            if (li.hasAttribute('style')) {
+                li.removeAttribute('style');
+            }
+        });
+
+        let html = editorRef.current.innerHTML;
+        
+        // Standarisasi konten kosong
+        if (html === '' || html === '<br>' || html === '<div><br></div>') {
+            html = '<p><br></p>';
+            editorRef.current.innerHTML = html;
+        }
+
+        if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+
+        debounceTimerRef.current = setTimeout(() => {
+            setData('content', html); // Menyimpan HTML bersih ke database
+        }, 500);
+    };
+
+    // Fungsi eksekutor tombol format text Rich Text (Hanya Menyisipkan Tag Tanpa Atribut Style)
+    const formatText = (command, value = null) => {
+        if (!editorRef.current) return;
+        
+        editorRef.current.focus();
+
+        if (command === 'subheadline') {
+            document.execCommand('formatBlock', false, '<h2>');
+            
+            const currentH2 = editorRef.current.querySelectorAll('h2');
+            currentH2.forEach(h2 => h2.removeAttribute('style'));
+
+        } else if (command === 'quotes') {
+            document.execCommand('formatBlock', false, '<blockquote>');
+            const currentQuotes = editorRef.current.querySelectorAll('blockquote');
+            currentQuotes.forEach(bq => bq.removeAttribute('style'));
+
+        } else if (command === 'bullet' || command === 'number') {
+            const nativeCommand = command === 'bullet' ? 'insertUnorderedList' : 'insertOrderedList';
+            document.execCommand(nativeCommand, false, value);
+
+            const elementsToClean = editorRef.current.querySelectorAll('li, li span, ul, ol');
+            elementsToClean.forEach(el => {
+                if (el.hasAttribute('style')) {
+                    el.removeAttribute('style');
+                }
+            });
+            
+        } else if (command === 'bold') {
+            // Memicu tag <strong> atau <b> murni
+            document.execCommand('bold', false, value);
+            
+            // Singkirkan span pembawa inline style pengganggu saat melakukan text-selection bold
+            const spans = editorRef.current.querySelectorAll('span');
+            spans.forEach(span => {
+                if (span.hasAttribute('style')) {
+                    span.removeAttribute('style');
+                }
+            });
+        } else if (command === 'link') {
+            const selection = window.getSelection();
+            let range = null;
+            if (selection && selection.rangeCount > 0) {
+                range = selection.getRangeAt(0);
+            }
+            let topPosition = 0;
+            let leftPosition = 0;
+
+            if (linkButtonRef.current) {
+                const rect = linkButtonRef.current.getBoundingClientRect();
+                topPosition = rect.bottom + window.scrollY + 8; 
+                leftPosition = rect.left + window.scrollX;
+                
+                if (leftPosition + 280 > window.innerWidth) {
+                    leftPosition = window.innerWidth - 300;
+                }
+
+                setLinkModal({
+                show: true,
+                url: 'https://',
+                range: range,
+                top: topPosition,
+                left: leftPosition
+            });
+            }
+            else {
+                alert('Silakan pilih/blok teks yang ingin diberi link terlebih dahulu.');
+            }
+        } else {
+            document.execCommand(command, false, value);
+        }
+
+        // Sinkronisasi data HTML bersih terakhir ke state formulir Inertia sebelum disubmit
+        if (editorRef.current) {
+            setData('content', editorRef.current.innerHTML);
+        }
+    };
+
+    const linkButtonRef = useRef(null);
+    const applyCustomLink = (e) => {
         e.preventDefault();
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const { start, end } = savedSelection;
-        const fullText = data.content;
-        const selectedText = fullText.substring(start, end);
-   
-        if (!linkUrl.trim() || linkUrl === 'https://') {
-            setIsLinkModalOpen(false);
+        
+        if (!linkModal.url || linkModal.url === 'https://' || linkModal.url.trim() === '') {
+            setLinkModal(prev => ({ ...prev, show: false }));
             return;
         }
 
-        const formattedText = `<a href="${linkUrl}" target="_blank">${selectedText || 'Teks Link'}</a>`;
-        const newContent = fullText.substring(0, start) + formattedText + fullText.substring(end);
+        editorRef.current.focus();
+        const selection = window.getSelection();
 
-        setData('content', newContent);
-        setIsLinkModalOpen(false);
-        setLinkUrl('https://');
-
-        setTimeout(() => {
-            textarea.focus();
-            const newCursorPos = start + formattedText.length;
-            textarea.setSelectionRange(newCursorPos, newCursorPos);
-        }, 0);
-    };
-
-    const formatText = (command) => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const fullText = data.content;
-        const selectedText = fullText.substring(start, end);
-
-        let formattedText = '';
-
-        switch (command) {
-            case 'bold':
-                formattedText = `<b>${selectedText}</b>`;
-                break;
-            case 'italic':
-                formattedText = `<i>${selectedText}</i>`;
-                break;
-            case 'underline':
-                formattedText = `<u>${selectedText}</u>`;
-                break;
-            case 'bullet':
-                formattedText = selectedText 
-                    ? selectedText.split('\n').map(line => `<li>${line}</li>`).join('\n')
-                    : '<li>\n  \n</li>';
-                break;
-            case 'number':
-                formattedText = selectedText 
-                    ? `<ol>\n${selectedText.split('\n').map(line => `  <li>${line}</li>`).join('\n')}\n</ol>`
-                    : '<ol>\n  <li>\n  \n</li>\n</ol>';
-                break;
-            case 'link':
-                setSavedSelection({
-                    start: textarea.selectionStart,
-                    end: textarea.selectionEnd
-                });
-                setIsLinkModalOpen(true);
-                return;
-            case 'paragraf':
-                formattedText = `<p>${selectedText}</p>`;
-                break;
-            case 'quotes':
-                formattedText = `<blockquote>${selectedText}</blockquote>`;
-                break;
-            default:
-                return;
+        if (linkModal.range) {
+            selection.removeAllRanges();
+            selection.addRange(linkModal.range);
+            document.execCommand('createLink', false, linkModal.url);
+        } else {
+            const cleanUrl = linkModal.url.trim();
+            const anchorTag = `<a href="${cleanUrl}" target="_blank" class="text-[#bb0021] dark:text-amber-500 underline font-medium">${cleanUrl}</a>`;
+            document.execCommand('insertHTML', false, anchorTag);
         }
 
-        const newContent = fullText.substring(0, start) + formattedText + fullText.substring(end);
-        setData('content', newContent);
+        if (editorRef.current) {
+            const links = editorRef.current.querySelectorAll('a');
+            links.forEach(link => {
+                link.removeAttribute('style');
+            });
+            // Sinkronisasi data HTML bersih terakhir ke Inertia
+            setData('content', editorRef.current.innerHTML);
+        }
 
-        setTimeout(() => {
-            textarea.focus();
-            const newCursorPos = start + formattedText.length;
-            textarea.setSelectionRange(newCursorPos, newCursorPos);
-        }, 0);
+        // Tutup modal popover
+        setLinkModal(prev => ({ ...prev, show: false, range: null }));
     };
 
     const handleAddCategory = (e) => {
@@ -168,10 +287,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
             onSuccess: () => {
                 setNewCategoryName('');
                 setCategoryError('');
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Kategori berhasil ditambahkan!'
-                });
+                Toast.fire({ icon: 'success', title: 'Kategori berhasil ditambahkan!' });
             },
             onError: (err) => {
                 setCategoryError(err.name || 'Gagal menambahkan kategori.');
@@ -180,15 +296,14 @@ export default function Create({ categories = [], article = null, drafts = [] })
         });
     };
 
-    // FUNGSI DELETE KATEGORI DENGAN SWEETALERT2
     const initiateDeleteCategory = (cat) => {
         Swal.fire({
             title: 'Apakah Anda yakin?',
             text: `Kategori "${cat.name}" akan dihapus secara permanen!`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ef4444', // Merah Tailwind
-            cancelButtonColor: '#27272a',  // Zinc 800 Tailwind
+            confirmButtonColor: '#ef4444', 
+            cancelButtonColor: '#27272a',  
             confirmButtonText: 'Ya, Hapus!',
             cancelButtonText: 'Batal',
             background: '#1e1e1e',
@@ -197,14 +312,10 @@ export default function Create({ categories = [], article = null, drafts = [] })
             if (result.isConfirmed) {
                 router.delete(`/categories/${cat.id}`, {
                     onSuccess: () => {
-                        // Jika kategori yang sedang dipilih di form adalah yang dihapus, reset pilihannya
                         if (data.category_id == cat.id) {
                             setData('category_id', '');
                         }
-                        Toast.fire({
-                            icon: 'success',
-                            title: 'Kategori berhasil dihapus!'
-                        });
+                        Toast.fire({ icon: 'success', title: 'Kategori berhasil dihapus!' });
                     },
                     preserveScroll: true,
                 });
@@ -226,21 +337,15 @@ export default function Create({ categories = [], article = null, drafts = [] })
 
     const handleSaveDraft = (e) => {
         if (e) e.preventDefault();
-        
-        const payload = { ...data, is_draft: true };
+        const finalContent = editorRef.current ? editorRef.current.innerHTML : data.content;
+        const payload = { ...data, content: finalContent, is_draft: true };
+        const activeId = article?.id || currentArticleId;
 
-        if (isEditMode) {
-            router.post(`/articles/${article.id}`, {
-                ...payload,
-                _method: 'PUT'
-            }, {
+        if (isEditMode || activeId) {
+            router.post(`/articles/${activeId}`, payload, {
                 forceFormData: true,
                 onSuccess: () => {
-                    Toast.fire({
-                        icon: 'info',
-                        title: 'Perubahan draf berhasil disimpan!',
-                        iconColor: '#38bdf8'
-                    });
+                    Toast.fire({ icon: 'info', title: 'Perubahan draf berhasil disimpan!', iconColor: '#38bdf8' });
                 }
             });
         } else {
@@ -248,48 +353,44 @@ export default function Create({ categories = [], article = null, drafts = [] })
                 forceFormData: true,
                 onSuccess: () => {
                     reset();
+                    if (editorRef.current) editorRef.current.innerHTML = '<p><br></p>';
                     setImagePreview(null);
-                    Toast.fire({
-                        icon: 'info',
-                        title: 'Draf baru berhasil disimpan!',
-                        iconColor: '#38bdf8'
-                    });
+                    Toast.fire({ icon: 'info', title: 'Draf baru berhasil disimpan!', iconColor: '#38bdf8' });
                 },
             });
         }
     };
-
+    
     const handlePublish = (e) => {
         if (e) e.preventDefault();
+        const finalContent = editorRef.current ? editorRef.current.innerHTML : data.content;
+        const activeId = article?.id || currentArticleId;
+        const publishPayload = { ...data, content: finalContent, is_draft: false };
 
-        const payload = { ...data, is_draft: false };
-
-        if (isEditMode) {
-            router.post(`/articles/${article.id}`, {
-                ...payload,
-                _method: 'PUT',
-            }, {
+        if (isEditMode || activeId) {
+            router.post(route('articles.update', activeId), publishPayload, {
                 forceFormData: true,
                 onSuccess: () => {
-                    Toast.fire({
-                        icon: 'success',
-                        title: 'Artikel berhasil diterbitkan!',
-                        iconColor: '#4ade80'
-                    });
+                    Toast.fire({ icon: 'success', title: 'Artikel berhasil diterbitkan!' });
                 },
+                onError: (err) => {
+                    console.error("Gagal Update:", err);
+                    Toast.fire({ icon: 'error', title: 'Gagal memperbarui artikel.' });
+                }
             });
         } else {
-            router.post('/articles', payload, { 
+            router.post(route('articles.store'), publishPayload, { 
                 forceFormData: true,
                 onSuccess: () => {
                     reset();
+                    if (editorRef.current) editorRef.current.innerHTML = '<p><br></p>';
                     setImagePreview(null);
-                    Toast.fire({
-                        icon: 'success',
-                        title: 'Artikel baru berhasil dipublikasikan!',
-                        iconColor: '#4ade80'
-                    });
+                    Toast.fire({ icon: 'success', title: 'Artikel baru berhasil dipublikasikan!' });
                 },
+                onError: (err) => {
+                    console.error("Gagal Simpan Baru:", err);
+                    Toast.fire({ icon: 'error', title: 'Gagal menerbitkan artikel.' });
+                }
             });
         }
     };
@@ -305,6 +406,19 @@ export default function Create({ categories = [], article = null, drafts = [] })
                         <h1 className="font-headline-lg text-2xl md:text-headline-lg text-primary dark:text-white tracking-tight">
                             {isEditMode ? 'Edit Article / Draft' : 'Compose New Article'}
                         </h1>
+
+                        <div className="mt-2 flex items-center gap-2 h-5">
+                            {isSaving ? (
+                                <span className="text-xs text-amber-500 font-mono flex items-center gap-1.5 animate-pulse">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Menyimpan draf otomatis...
+                                </span>
+                            ) : data.title || (data.content && data.content !== '<p><br></p>') ? (
+                                <span className="text-xs text-zinc-500 font-mono flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Draf aman di server
+                                </span>
+                            ) : null}
+                        </div>
+                        
                         {Object.keys(errors).length > 0 && (
                             <div className="p-4 my-4 bg-red-900/50 border-l-4 border-red-500 text-red-200 text-sm">
                                 <p className="font-bold">Gagal menyimpan! Periksa kolom berikut:</p>
@@ -317,6 +431,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
                         )}
                         <p className="font-body-md text-xs md:text-body-md text-on-surface-variant mt-1.5 italic">Crafting stories with precision and integrity.</p>
                     </div>
+
                     <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6 md:mt-0 w-full md:w-auto">
                         <button 
                             type="button"
@@ -338,10 +453,9 @@ export default function Create({ categories = [], article = null, drafts = [] })
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
-                    {/* Main Content Area (8 Columns) */}
-                    <form onSubmit={handlePublish} className="lg:col-span-8 space-y-8 md:space-y-10 w-full">
+                    {/* Main Content Area */}
+                    <div className="lg:col-span-8 space-y-8 md:space-y-10 w-full">
                         <section className="space-y-6">
-                            {/* Input Judul */}
                             <div>
                                 <label className="font-label-caps text-[11px] md:text-label-caps text-on-surface-variant mb-2 block uppercase tracking-widest">Article Title</label>
                                 <input 
@@ -385,12 +499,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
                         <section>
                             <label className="font-label-caps text-[11px] md:text-label-caps text-on-surface-variant mb-4 block uppercase tracking-widest">Featured Editorial Image</label>
                             <label className="relative group aspect-[16/7] md:aspect-[21/9] w-full border border-dashed border-outline-variant hover:border-primary flex flex-col items-center justify-center bg-surface-container-lowest dark:bg-zinc-900 transition-all cursor-pointer overflow-hidden p-4">
-                                <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    onChange={handleImageChange} 
-                                    className="hidden" 
-                                />
+                                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                                 {imagePreview ? (
                                     <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
                                 ) : (
@@ -403,41 +512,75 @@ export default function Create({ categories = [], article = null, drafts = [] })
                             {errors.thumbnail && <p className="text-red-500 text-xs mt-1">{errors.thumbnail}</p>}
                         </section>
 
+                        {/* SECTION RICH TEXT EDITOR */}
                         <section className="w-full">
                             <label className="font-label-caps text-[11px] md:text-label-caps text-on-surface-variant mb-4 block uppercase tracking-widest">Article Body</label>
                             <div className="border border-outline-variant bg-surface-container-lowest dark:bg-zinc-900 w-full">
                                 <div className="flex flex-wrap items-center gap-3 md:gap-4 px-3 md:px-4 py-2.5 border-b border-outline-variant bg-surface-container-low dark:bg-zinc-800">
-                                    <button type="button" onClick={() => formatText('paragraf')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Paragraph">format_paragraph</button>
                                     <button type="button" onClick={() => formatText('bold')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Bold">format_bold</button>
                                     <button type="button" onClick={() => formatText('italic')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Italic">format_italic</button>
                                     <button type="button" onClick={() => formatText('underline')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Underline">format_underlined</button>
+                                    <button type="button" onClick={() => formatText('subheadline')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Subheadline">label</button>
                                     <div className="w-[1px] h-4 bg-outline-variant mx-1"></div>
                                     <button type="button" onClick={() => formatText('bullet')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Bullet List">format_list_bulleted</button>
                                     <button type="button" onClick={() => formatText('number')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Numbered List">format_list_numbered</button>
                                     <button type="button" onClick={() => formatText('quotes')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Quotes">format_quote</button>
                                     <div className="w-[1px] h-4 bg-outline-variant mx-1"></div>
-                                    <button type="button" onClick={() => formatText('link')} className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white" title="Insert Link">link</button>
+                                    <button 
+                                        type="button" 
+                                        ref={linkButtonRef} // <-- PASANG REFERENSI DI SINI
+                                        onClick={() => formatText('link')} 
+                                        className="material-symbols-outlined text-[18px] md:text-[20px] text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-white cursor-pointer" 
+                                        title="Insert Link"
+                                    >
+                                        link
+                                    </button>
                                 </div>
-                                <textarea 
-                                    ref={textareaRef}
-                                    rows="12"
-                                    className="w-full p-4 dark:bg-zinc-900 text-sm focus:outline-none border-none font-mono"
-                                    value={data.content}
-                                    onChange={e => setData('content', e.target.value)}
-                                    placeholder="Tulis konten artikel Anda di sini..."
-                                ></textarea>
+                                
+                                <div 
+                                    ref={editorRef}
+                                    contentEditable
+                                    suppressContentEditableWarning={true}
+                                    onInput={handleEditorChange}
+                                    className="w-full p-4 pl-10 dark:bg-zinc-900 text-sm focus:outline-none border-none min-h-[320px] focus:ring-0 overflow-y-auto font-sans"
+                                    style={{ outline: 'none' }}
+                                ></div>
+
+                                <style>{`
+                                    [contenteditable] h2, {
+                                        font-family: 'Newsreader', serif;
+                                        font-weight: 600 !important;
+                                        color: currentColor;
+                                        line-height: 1.6;
+                                        margin-top: 1.5rem !important;
+                                        margin-bottom: 1.5rem !important;
+                                        display: block !important;
+                                    }
+                                    [contenteditable] h2 { font-size: 22px !important; }    
+                                    [contenteditable] p { 
+                                        margin-top: 0px !important; 
+                                        margin-bottom: 1rem !important; 
+                                        font-size: 15px !important;
+                                        line-height: 1.6;
+                                    }
+                                    [contenteditable] ul { 
+                                        list-style-type: disc !important; 
+                                        margin-left: 1.25rem !important; 
+                                        padding-left: 0px !important; }
+                                    [contenteditable] ol { list-style-type: decimal !important; margin-left: 1.25rem !important; padding-left: 0px !important; }
+                                    [contenteditable] li { display: list-item !important; margin-bottom: 0px !important; margin-top: 0px !important; }
+                                    [contenteditable] p { margin-top: 0px !important; margin-bottom: 0px !important; }
+                                `}</style>
                             </div>
                             {errors.content && <p className="text-red-500 text-xs mt-1">{errors.content}</p>}
                         </section>
-                    </form>
+                    </div>
 
-                    {/* Sidebar Metadata (4 Columns) */}
+                    {/* Sidebar Metadata */}
                     <aside className="lg:col-span-4 space-y-6 w-full">
                         <div className="bg-surface-container-low dark:bg-zinc-900 p-6 border border-outline-variant space-y-6">
                             {(() => {
-                                const sortedCategories = categories 
-                                    ? [...categories].sort((a, b) => a.name.localeCompare(b.name)) 
-                                    : [];
+                                const sortedCategories = categories ? [...categories].sort((a, b) => a.name.localeCompare(b.name)) : [];
 
                                 return (
                                     <>
@@ -455,8 +598,8 @@ export default function Create({ categories = [], article = null, drafts = [] })
 
                                             <select 
                                                 className="w-full border p-2 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 uppercase text-xs focus:outline-none focus:border-secondary"
-                                                value={data.category_id}
-                                                onChange={e => setData('category_id', e.target.value)}
+                                                value={data.category_id || ''}
+                                                onChange={e => setData('category_id', e.target.value === '' ? '' : Number(e.target.value))}
                                             >
                                                 <option value="">Select Category</option>
                                                 {sortedCategories.map(cat => (
@@ -476,13 +619,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
                                                         value={newCategoryName}
                                                         onChange={e => setNewCategoryName(e.target.value)}
                                                     />
-                                                    <button 
-                                                        type="button" 
-                                                        onClick={handleAddCategory}
-                                                        className="bg-zinc-800 text-white px-4 py-2 text-xs font-bold uppercase hover:opacity-90"
-                                                    >
-                                                        Add
-                                                    </button>
+                                                    <button type="button" onClick={handleAddCategory} className="bg-zinc-800 text-white px-4 py-2 text-xs font-bold uppercase hover:opacity-90">Add</button>
                                                 </div>
                                                 {categoryError && <p className="text-red-500 text-xs mb-3">{categoryError}</p>}
 
@@ -490,13 +627,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
                                                     {sortedCategories.map(cat => (
                                                         <div key={cat.id} className="flex justify-between items-center text-xs p-1.5 bg-white dark:bg-zinc-800 border border-zinc-200">
                                                             <span className="uppercase">{cat.name}</span>
-                                                            <button 
-                                                                type="button" 
-                                                                onClick={() => initiateDeleteCategory(cat)} 
-                                                                className="text-red-500 font-bold px-1 hover:text-red-700 transition-colors"
-                                                            >
-                                                                ✕
-                                                            </button>
+                                                            <button type="button" onClick={() => initiateDeleteCategory(cat)} className="text-red-500 font-bold px-1 hover:text-red-700 transition-colors">✕</button>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -529,54 +660,119 @@ export default function Create({ categories = [], article = null, drafts = [] })
                             </div>
                         </div>
 
-                        {/* Sidebar Daftar Draf Tersimpan */}
+                        {/* LIVE PREVIEW CARD */}
+                        <div className="border border-outline-variant bg-surface-container-low dark:bg-zinc-900 p-6 space-y-4">
+                            <div className="flex items-center justify-between border-b border-outline-variant pb-2">
+                                <label className="font-label-caps text-[11px] block uppercase tracking-widest text-zinc-400">Live Card Preview</label>
+                                <span className="text-[10px] bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-wider">Live</span>
+                            </div>
+                            
+                            <div className="group block border border-outline-variant/60 bg-white dark:bg-zinc-950 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                                <div className="aspect-[16/9] w-full bg-zinc-100 dark:bg-zinc-900 relative overflow-hidden flex items-center justify-center">
+                                    {imagePreview ? (
+                                        <img src={imagePreview} alt="Preview Card Thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    ) : (
+                                        <div className="text-center text-zinc-400 p-4">
+                                            <span className="material-symbols-outlined text-[32px] block mb-1">image</span>
+                                            <span className="text-xs font-mono">No Image Uploaded</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="p-4 md:p-5 space-y-2.5">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-label-caps tracking-wider text-amber-600 dark:text-amber-500 font-bold uppercase">
+                                            {categories && categories.find(c => String(c.id) === String(data?.category_id))?.name || 'Uncategorized'}
+                                        </span>
+                                    </div>
+
+                                    <h3 className="font-headline-sm text-base md:text-lg font-bold text-primary dark:text-white line-clamp-2 leading-tight tracking-tight min-h-[2.5rem]">
+                                        {data?.title?.trim() ? data.title : <span className="text-zinc-400 italic font-normal">Untitled Headline</span>}
+                                    </h3>
+
+                                    <p className="font-body-sm text-xs md:text-sm text-on-surface-variant dark:text-zinc-400 line-clamp-3 leading-relaxed min-h-[3rem]">
+                                        {data?.excerpt?.trim() ? data.excerpt : <span className="text-zinc-500 italic">No subheadline or excerpt written yet...</span>}
+                                    </p>
+                                    
+                                    <div className="pt-2 border-t border-outline-variant/40 flex items-center justify-between text-[10px] text-zinc-400 font-mono">
+                                        <span>By You • Just now</span>
+                                        {data?.feature_on_homepage && (
+                                            <span className="flex items-center gap-1 text-amber-500 font-semibold uppercase tracking-wider">
+                                                <span className="w-1 h-1 rounded-full bg-amber-500"></span> Featured
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* SAVED DRAFTS SIDEBAR (PENGAMAN TOTAL) */}
                         <div className="bg-surface-container dark:bg-[#1e1e1e] p-5 border border-zinc-800">
                             <h3 className="text-xs font-mono tracking-wider uppercase text-secondary dark:text-amber-400 mb-4 flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-secondary dark:bg-amber-500 animate-pulse"></span>
-                                Draf Tersimpan ({drafts.length})
+                                Draf Tersimpan ({drafts?.length || 0})
                             </h3>
 
-                            {drafts.length === 0 ? (
+                            {!drafts || drafts.length === 0 ? (
                                 <p className="text-xs text-zinc-500 italic py-2 text-center">Belum ada draf.</p>
                             ) : (
                                 <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                                    {drafts.map((draft) => (
-                                        <div key={draft.id} className="p-3 bg-[#282828] hover:bg-[#303030] border border-zinc-800 transition flex flex-col justify-between gap-2">
-                                            <div>
-                                                <h4 className="text-xs font-medium text-zinc-200 line-clamp-1">{draft.title || '(Belum ada judul)'}</h4>
-                                                <span className="text-[10px] text-zinc-500">{draft.category?.name || 'Tanpa Kategori'}</span>
+                                    {drafts.map((draft) => {
+                                        if (!draft) return null;
+                                        return (
+                                            <div key={draft.id} className="p-3 bg-on-secondary dark:bg-[#282828] dark:hover:bg-[#303030] border border-zinc-800 transition flex flex-col justify-between gap-2">
+                                                <div>
+                                                    <h4 className="text-primary text-xs font-medium dark:text-zinc-200 line-clamp-1">{draft?.title || '(Belum ada judul)'}</h4>
+                                                    <span className="text-[10px] text-zinc-500">{draft?.category?.name || 'Tanpa Kategori'}</span>
+                                                </div>
+                                                <a href={`/articles/${draft?.id}/edit`} className="text-center px-3 py-1 bg-outline dark:bg-zinc-800 hover:bg-zinc-700 text-[11px] font-medium text-on-secondary border border-zinc-700 transition">
+                                                    Buka Draf
+                                                </a>
                                             </div>
-                                            <a href={`/articles/${draft.id}/edit`} className="text-center px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-[11px] font-medium text-blue-400 border border-zinc-700 transition">
-                                                Buka Draf
-                                            </a>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
                     </aside>
                 </div>
             </main>
-
-            {/* Modal Link (Tetap dipertahankan untuk fitur formatText) */}
-            {isLinkModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <form onSubmit={handleInsertLink} className="bg-zinc-900 border border-zinc-800 p-6 max-w-sm w-full text-white space-y-4">
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-amber-400">Insert Link</h3>
-                        <div>
-                            <label className="text-xs text-zinc-400 block mb-1">URL Address</label>
+            {/* --- INLINE LINK POPOVER MODERN --- */}
+            {linkModal.show && (
+                <div 
+                    className="absolute z-[999] p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-lg flex items-center gap-2 max-w-sm w-[280px] sm:w-[320px]"
+                    style={{ 
+                        top: `${linkModal.top}px`, 
+                        left: `${linkModal.left}px` 
+                    }}
+                >
+                    <form onSubmit={applyCustomLink} className="flex items-center gap-2 w-full">
+                        <div className="relative flex-1">
+                            <span className="material-symbols-outlined text-[16px] text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2">
+                                link
+                            </span>
                             <input 
-                                type="text" 
-                                value={linkUrl} 
-                                onChange={e => setLinkUrl(e.target.value)}
-                                className="w-full bg-zinc-800 border border-zinc-700 p-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                                required
+                                type="text"
+                                value={linkModal.url}
+                                onChange={(e) => setLinkModal({ ...linkModal, url: e.target.value })}
+                                placeholder="Paste or type URL..."
+                                autoFocus
+                                className="w-full pl-8 pr-3 py-1.5 bg-zinc-50 dark:bg-zinc-800 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md focus:outline-none focus:border-secondary dark:focus:border-amber-500 text-slate-800 dark:text-white"
                             />
                         </div>
-                        <div className="flex justify-end gap-2 text-xs">
-                            <button type="button" onClick={() => setIsLinkModalOpen(false)} className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700">Cancel</button>
-                            <button type="submit" className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold">Insert</button>
-                        </div>
+                        <button
+                            type="submit"
+                            className="px-3 py-1.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-medium rounded-md text-[10px] uppercase tracking-wider hover:opacity-90 transition-opacity cursor-pointer flex-shrink-0"
+                        >
+                            Apply
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setLinkModal(prev => ({ ...prev, show: false }))}
+                            className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-zinc-600 transition-colors flex-shrink-0 cursor-pointer"
+                        >
+                            <span className="material-symbols-outlined text-[16px] block">close</span>
+                        </button>
                     </form>
                 </div>
             )}

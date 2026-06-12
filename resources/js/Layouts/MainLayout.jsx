@@ -1,6 +1,7 @@
 import { Link, useForm, usePage, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import EditorialSkeleton from '@/Pages/EditorialSkeleton';
+import axios from 'axios';
 
 export default function MainLayout({ children, activePage, categories = [] }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -58,9 +59,51 @@ export default function MainLayout({ children, activePage, categories = [] }) {
     const { data, setData } = useForm({
         search: '',
     });
+    
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const searchContainerRef = useRef(null);
+
+    useEffect(() => {
+        if (!data.search.trim()) {
+            setSearchResults([]);
+            setShowDropdown(false);
+            return;
+        }
+
+        setIsSearching(true);
+        setShowDropdown(true);
+
+        const delaySearchTimer = setTimeout(() => {
+            axios.get(`/api/articles/search?q=${data.search}`)
+                .then(response => {
+                    setSearchResults(response.data);
+                    setIsSearching(false);
+                })
+                .catch(error => {
+                    console.error("Pencarian global gagal:", error);
+                    setIsSearching(false);
+                });
+        }, 300);
+
+        return () => clearTimeout(delaySearchTimer);
+    }, [data.search]);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const handleSearch = (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+        setShowDropdown(false);
+        setIsMobileMenuOpen(false); // Tutup menu mobile jika menekan Enter
         router.get(route('articles.index'), 
             { search: data.search }, 
             { 
@@ -124,15 +167,64 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                         
                     {/* Search & Actions (Kanan) */}
                     <div className="flex items-center gap-6 py-6">
-                        <form onSubmit={handleSearch} className="hidden lg:block relative">
-                            <input 
-                                className="bg-transparent border-b border-outline px-2 py-1 focus:outline-none focus:border-primary text-body-md w-32 focus:w-48 transition-all" 
-                                placeholder="Search..." 
-                                type="text"
-                                value={data.search}
-                                onChange={e => setData('search', e.target.value)}
-                            />
-                        </form>
+                        
+                        {/* INPUT LIVE SEARCH DESKTOP */}
+                        <div ref={searchContainerRef} className="hidden lg:block relative">
+                            <form onSubmit={handleSearch}>
+                                <input 
+                                    className="bg-transparent border-b border-outline px-2 py-1 focus:outline-none focus:border-primary text-body-md w-32 focus:w-48 transition-all dark:border-zinc-700 dark:focus:border-amber-500" 
+                                    placeholder="Search..." 
+                                    type="text"
+                                    value={data.search}
+                                    onChange={e => setData('search', e.target.value)}
+                                    onFocus={() => data.search.trim() && setShowDropdown(true)}
+                                />
+                                {isSearching && (
+                                    <span className="absolute right-2 top-1.5 text-[10px] text-zinc-400 animate-pulse font-mono">...</span>
+                                )}
+                            </form>
+
+                            {/* DROPDOWN OVERLAY HASIL PENCARIAN DESKTOP */}
+                            {showDropdown && (
+                                <div className="absolute right-0 mt-3 w-72 md:w-80 bg-white dark:bg-zinc-900 border border-outline-variant dark:border-zinc-800 shadow-xl z-50 max-h-64 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800 rounded-sm">
+                                    {searchResults.length === 0 ? (
+                                        <div className="p-4 text-xs text-zinc-500 italic text-center">
+                                            No results found for "{data.search}"
+                                        </div>
+                                    ) : (
+                                        searchResults.map((result) => (
+                                            <Link 
+                                                key={result.id} 
+                                                href={`/articles/${result.id}/edit`} 
+                                                onClick={() => setShowDropdown(false)}
+                                                className="p-3 hover:bg-slate-50 dark:hover:bg-zinc-800 transition flex items-center justify-between gap-3 text-left block w-full group"
+                                            >
+                                                <div className="truncate">
+                                                    <h4 className="text-xs font-medium text-zinc-800 dark:text-zinc-200 group-hover:text-secondary dark:group-hover:text-amber-500 transition truncate">
+                                                        {result.title}
+                                                    </h4>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className="text-[9px] font-mono text-zinc-400 dark:text-zinc-500 uppercase">
+                                                            {result.category?.name || 'Uncategorized'}
+                                                        </span>
+                                                        <span className={`text-[8px] font-mono px-1 border uppercase tracking-wider ${
+                                                            result.status === 'published' 
+                                                                ? 'border-green-200 text-green-600 bg-green-50 dark:border-green-950/50 dark:text-green-400 dark:bg-green-950/20' 
+                                                                : 'border-amber-200 text-amber-600 bg-amber-50 dark:border-amber-950/50 dark:text-amber-400 dark:bg-amber-950/20'
+                                                        }`}>
+                                                            {result.status}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <span className="material-symbols-outlined text-[14px] text-zinc-400 group-hover:translate-x-0.5 transition-transform">
+                                                    arrow_forward_ios
+                                                </span>
+                                            </Link>
+                                        ))
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
                         {/* Area Otentikasi User (Desktop Only) */}
                         <div className="hidden md:flex items-center gap-6">
@@ -203,60 +295,123 @@ export default function MainLayout({ children, activePage, categories = [] }) {
 
                 {/* Panel Menu Drop-Down Mobile */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 w-full bg-surface dark:bg-[#121212] border-b border-outline-variant dark:border-zinc-800 px-6 py-6 shadow-xl space-y-4 animate-fade-in-down z-50">
-                        <form onSubmit={handleSearch} className="relative w-full mb-4">
-                            <input 
-                                className="w-full bg-transparent border-b border-outline px-2 py-2 focus:outline-none focus:border-primary text-body-md" 
-                                placeholder="Search articles..." 
-                                type="text"
-                                value={data.search}
-                                onChange={e => setData('search', e.target.value)}
-                            />
-                        </form>
+                    <div className="md:hidden absolute top-full left-0 w-full bg-surface dark:bg-[#121212] border-b border-outline-variant dark:border-zinc-800 px-6 py-6 shadow-xl space-y-4 z-50">
+                        
+                        {/* FORM SEARCH UTK MOBILE */}
+                        <div className="relative w-full mb-4">
+                            <form onSubmit={handleSearch}>
+                                <input 
+                                    className="w-full bg-transparent border-b border-outline px-2 py-2 focus:outline-none focus:border-primary text-body-md dark:border-zinc-700 dark:text-white" 
+                                    placeholder="Search articles..." 
+                                    type="text"
+                                    value={data.search}
+                                    onChange={e => setData('search', e.target.value)}
+                                    onFocus={() => data.search.trim() && setShowDropdown(true)}
+                                />
+                                {isSearching && (
+                                    <span className="absolute right-2 top-3 text-[10px] text-zinc-400 animate-pulse font-mono">...</span>
+                                )}
+                            </form>
 
-                        <div className="flex flex-col gap-3 font-medium">
-                            <Link href="/" className="py-2 text-primary dark:text-white border-b border-zinc-100 dark:border-zinc-900">Home</Link>
-                            <Link href={route('articles.index')} className="py-2 text-primary dark:text-white border-b border-zinc-100 dark:border-zinc-900">Articles</Link>
-                            <Link href="/trending" className="py-2 text-primary dark:text-white border-b border-zinc-100 dark:border-zinc-900">Trending</Link>
-                            <Link href="/about" className="py-2 text-primary dark:text-white border-b border-zinc-100 dark:border-zinc-900">About</Link>
+                            {/* DROPDOWN OVERLAY HASIL PENCARIAN MOBILE */}
+                            {showDropdown && (
+                                <div className="absolute left-0 right-0 mt-2 w-full bg-white dark:bg-zinc-900 border border-outline-variant dark:border-zinc-800 shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800 rounded-sm">
+                                    {searchResults.length === 0 ? (
+                                        <div className="p-4 text-xs text-zinc-500 italic text-center">
+                                            No results found for "{data.search}"
+                                        </div>
+                                    ) : (
+                                        searchResults.map((result) => (
+                                            <Link 
+                                                key={result.id} 
+                                                href={`/articles/${result.id}/edit`} 
+                                                onClick={() => {
+                                                    setShowDropdown(false);
+                                                    setIsMobileMenuOpen(false);
+                                                }}
+                                                className="p-3 hover:bg-slate-50 dark:hover:bg-zinc-800 transition flex items-center justify-between gap-3 text-left block w-full group"
+                                            >
+                                                <div className="truncate">
+                                                    <h4 className="text-xs font-medium text-zinc-800 dark:text-zinc-200 group-hover:text-secondary dark:group-hover:text-amber-500 transition truncate">
+                                                        {result.title}
+                                                    </h4>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className="text-[9px] font-mono text-zinc-400 dark:text-zinc-500 uppercase">
+                                                            {result.category?.name || 'Uncategorized'}
+                                                        </span>
+                                                        <span className={`text-[8px] font-mono px-1 border uppercase tracking-wider ${
+                                                            result.status === 'published' 
+                                                                ? 'border-green-200 text-green-600 bg-green-50 dark:border-green-950/50 dark:text-green-400 dark:bg-green-950/20' 
+                                                                : 'border-amber-200 text-amber-600 bg-amber-50 dark:border-amber-950/50 dark:text-amber-400 dark:bg-amber-950/20'
+                                                        }`}>
+                                                            {result.status}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <span className="material-symbols-outlined text-[14px] text-zinc-400">
+                                                    arrow_forward_ios
+                                                </span>
+                                            </Link>
+                                        ))
+                                    )}
+                                </div>
+                            )}
                         </div>
 
-                        <div className="pt-4 border-t border-outline-variant dark:border-zinc-800">
+                        {/* LINK NAVIGASI UTAMA MOBILE */}
+                        <div className="flex flex-col gap-3 font-medium">
+                            <Link 
+                                href="/" 
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`py-2 border-b border-zinc-100 dark:border-zinc-900 ${activePage === 'home' ? 'text-secondary dark:text-amber-500' : 'text-primary dark:text-white'}`}
+                            >
+                                Home
+                            </Link>
+                            
+                            {['articles', 'trending', 'about'].map((item) => (
+                                <Link 
+                                    key={item}
+                                    href={item === 'articles' ? route('articles.index') : `/${item}`} 
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={`py-2 border-b border-zinc-100 dark:border-zinc-900 capitalize ${activePage === item ? 'text-secondary dark:text-amber-500' : 'text-primary dark:text-white'}`}
+                                >
+                                    {item}
+                                </Link>
+                            ))}
+
+                            {/* AUTHENTICATION LINKS UNTUK MOBILE */}
                             {user ? (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center bg-slate-50 dark:bg-zinc-900 p-3 rounded">
-                                        <div className="flex flex-col">
-                                            <span className="text-xs font-bold text-secondary">
-                                                {getRoleName(user.role)}
-                                            </span>
-                                            <span className="text-sm italic">{user.name}</span>
-                                        </div>
+                                <div className="pt-2 space-y-3">
+                                    <div className="text-xs text-zinc-400">
+                                        Signed in as <span className="font-bold text-primary dark:text-white">{user.name}</span> ({getRoleName(user.role)})
                                     </div>
                                     {getRoleName(user.role) === 'admin' && (
                                         <Link 
                                             href="/create" 
-                                            className="bg-primary dark:bg-secondary text-on-primary px-6 py-2 font-label-caps text-label-caps hover:bg-secondary dark:hover:bg-on-surface-variant transition-colors flex items-center gap-2"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="block text-center bg-primary dark:bg-zinc-800 text-white p-2 text-xs font-bold uppercase tracking-wider"
                                         >
-                                            <span className="material-symbols-outlined text-sm">edit_note</span>
-                                            Create Article
+                                            + Write Story
                                         </Link>
                                     )}
                                     <Link 
                                         href={route('logout')} 
                                         method="post" 
                                         as="button" 
-                                        className="w-full text-center text-sm font-bold text-red-600 dark:text-red-400 py-2 border border-red-200 dark:border-red-950/50 cursor-pointer"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="w-full text-left py-2 text-red-600 font-medium"
                                     >
                                         Logout
                                     </Link>
                                 </div>
                             ) : (
-                                <a 
-                                    href="/login"
-                                    className="block w-full text-center bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-3 text-xs font-bold tracking-widest uppercase italic cursor-pointer"
+                                <Link 
+                                    href="/login" 
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block text-center border border-primary dark:border-zinc-700 py-2 text-xs font-bold uppercase tracking-wider mt-2"
                                 >
                                     Sign In
-                                </a>
+                                </Link>
                             )}
                         </div>
                     </div>
