@@ -13,10 +13,32 @@ return new class extends Migration
     {
         Schema::create('articles', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('user_id');
+
+            $table->foreignId('category_id')
+                ->nullable();
+
             $table->string('title');
-            $table->string('category'); // Untuk fitur kategori
-            $table->text('description'); // Untuk konten/pencarian
-            $table->string('image_url')->nullable(); // Foto berita
+            $table->string('slug')->unique();
+
+            $table->text('excerpt')->nullable();
+            $table->longText('content');
+
+            $table->boolean('allow_comments')->default(true);
+            $table->boolean('feature_on_homepage')->default(false);
+
+            $table->string('thumbnail', 500)->nullable();
+
+            $table->enum('status', [
+                'draft',
+                'published'
+            ])->default('draft');
+
+            $table->timestamp('published_at')->nullable();
+
+            $table->unsignedInteger('views_count')->default(0);
+
             $table->timestamps();
         });
     }

@@ -134,11 +134,13 @@ export default function Create({ categories = [], article = null, drafts = [] })
         if (!editorRef.current) return;
 
         const allSpans = editorRef.current.querySelectorAll('span');
+
         allSpans.forEach(span => {
-            if (span.hasAttribute('style')) {
-                span.removeAttribute('style');
-            }
-            if (!span.hasAttribute('class') && span.tagName.toLowerCase() === 'span') {
+            if (
+                !span.hasAttribute('class') &&
+                !span.hasAttribute('style') &&
+                span.tagName.toLowerCase() === 'span'
+            ) {
                 const textNode = document.createTextNode(span.textContent);
                 span.parentNode.replaceChild(textNode, span);
             }
@@ -162,8 +164,68 @@ export default function Create({ categories = [], article = null, drafts = [] })
         if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
         debounceTimerRef.current = setTimeout(() => {
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+
+            temp.querySelectorAll('*').forEach(el => {
+                [...el.attributes].forEach(attr => {
+                    const name = attr.name.toLowerCase();
+
+                    if (
+                        name.startsWith('data-') ||
+                        name.startsWith('aria-') ||
+                        name.startsWith('js')
+                    ) {
+                        el.removeAttribute(attr.name);
+                    }
+                });
+            });
+
+            temp.querySelectorAll('a').forEach(link => {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+            });
+
+            html = temp.innerHTML;
+            temp.querySelectorAll('*').forEach(el => {
+                if (
+                    el.tagName !== 'A' &&
+                    el.tagName !== 'BLOCKQUOTE' &&
+                    el.tagName !== 'H2'
+                ) {
+                    el.removeAttribute('style');
+                }
+
+                [...el.attributes].forEach(attr => {
+                    const name = attr.name.toLowerCase();
+
+                    if (
+                        name.startsWith('data-') ||
+                        name.startsWith('aria-') ||
+                        name.startsWith('js')
+                    ) {
+                        el.removeAttribute(attr.name);
+                    }
+                });
+            });
+            if (!html.includes('<p') && !html.includes('<h2') && !html.includes('<blockquote')) {
+                html = `<p>${editorRef.current.innerHTML}</p>`;
+                editorRef.current.innerHTML = html;
+            }
             setData('content', html); // Menyimpan HTML bersih ke database
         }, 500);
+    };
+
+    const handlePaste = (e) => {
+        e.preventDefault();
+
+        const text = e.clipboardData.getData('text/plain');
+
+        document.execCommand(
+            'insertText',
+            false,
+            text
+        );
     };
 
     // Fungsi eksekutor tombol format text Rich Text (Hanya Menyisipkan Tag Tanpa Atribut Style)
@@ -173,21 +235,73 @@ export default function Create({ categories = [], article = null, drafts = [] })
         editorRef.current.focus();
 
         if (command === 'subheadline') {
-            document.execCommand('formatBlock', false, '<h2>');
-            
-            const currentH2 = editorRef.current.querySelectorAll('h2');
-            currentH2.forEach(h2 => h2.removeAttribute('style'));
+            const selection = window.getSelection();
 
+            if (!selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+
+            if (range.collapsed) return;
+
+            const h2 = document.createElement('h2');
+
+            try {
+                range.surroundContents(h2);
+            } catch (err) {
+                const content = range.extractContents();
+                h2.appendChild(content);
+                range.insertNode(h2);
+            }
         } else if (command === 'quotes') {
-            document.execCommand('formatBlock', false, '<blockquote>');
-            const currentQuotes = editorRef.current.querySelectorAll('blockquote');
-            currentQuotes.forEach(bq => bq.removeAttribute('style'));
+            const selection = window.getSelection();
 
+            if (!selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+
+            let node = range.commonAncestorContainer;
+
+            while (node && node !== editorRef.current) {
+                if (
+                    node.nodeType === 1 &&
+                    node.tagName.toLowerCase() === 'blockquote'
+                ) {
+                    const parent = node.parentNode;
+
+                    while (node.firstChild) {
+                        parent.insertBefore(node.firstChild, node);
+                    }
+
+                    parent.removeChild(node);
+
+                    setData('content', editorRef.current.innerHTML);
+                    return;
+                }
+
+                node = node.parentNode;
+            }
+
+            if (range.collapsed) return;
+
+            const blockquote = document.createElement('blockquote');
+
+            try {
+                range.surroundContents(blockquote);
+            } catch (err) {
+                const content = range.extractContents();
+                blockquote.appendChild(content);
+                range.insertNode(blockquote);
+            }
+
+            setData('content', editorRef.current.innerHTML);
         } else if (command === 'bullet' || command === 'number') {
             const nativeCommand = command === 'bullet' ? 'insertUnorderedList' : 'insertOrderedList';
             document.execCommand(nativeCommand, false, value);
 
-            const elementsToClean = editorRef.current.querySelectorAll('li, li span, ul, ol');
+            const elementsToClean = editorRef.current.querySelectorAll(
+                'li, li span, ul, ol, ul span, ol span'
+            );
+
             elementsToClean.forEach(el => {
                 if (el.hasAttribute('style')) {
                     el.removeAttribute('style');
@@ -262,7 +376,12 @@ export default function Create({ categories = [], article = null, drafts = [] })
             document.execCommand('createLink', false, linkModal.url);
         } else {
             const cleanUrl = linkModal.url.trim();
-            const anchorTag = `<a href="${cleanUrl}" target="_blank" class="text-[#bb0021] dark:text-amber-500 underline font-medium">${cleanUrl}</a>`;
+            const anchorTag = `
+            <a href="${cleanUrl}"
+            rel="noopener noreferrer"
+            target="_blank">
+            ${cleanUrl}
+            </a>`;
             document.execCommand('insertHTML', false, anchorTag);
         }
 
@@ -542,12 +661,13 @@ export default function Create({ categories = [], article = null, drafts = [] })
                                     contentEditable
                                     suppressContentEditableWarning={true}
                                     onInput={handleEditorChange}
+                                    onPaste={handlePaste}
                                     className="w-full p-4 pl-10 dark:bg-zinc-900 text-sm focus:outline-none border-none min-h-[320px] focus:ring-0 overflow-y-auto font-sans"
                                     style={{ outline: 'none' }}
                                 ></div>
 
                                 <style>{`
-                                    [contenteditable] h2, {
+                                    [contenteditable] h2 {
                                         font-family: 'Newsreader', serif;
                                         font-weight: 600 !important;
                                         color: currentColor;
@@ -570,6 +690,18 @@ export default function Create({ categories = [], article = null, drafts = [] })
                                     [contenteditable] ol { list-style-type: decimal !important; margin-left: 1.25rem !important; padding-left: 0px !important; }
                                     [contenteditable] li { display: list-item !important; margin-bottom: 0px !important; margin-top: 0px !important; }
                                     [contenteditable] p { margin-top: 0px !important; margin-bottom: 0px !important; }
+                                    [contenteditable] blockquote {
+                                        border-left: 4px solid #bb0021;
+                                        padding-left: 16px;
+                                        margin: 16px 0;
+                                        font-style: italic;
+                                        opacity: 0.9;
+                                    }
+                                    [contenteditable] a {
+                                        color: #bb0021;
+                                        text-decoration: underline;
+                                        font-weight: 500;
+                                    }
                                 `}</style>
                             </div>
                             {errors.content && <p className="text-red-500 text-xs mt-1">{errors.content}</p>}
