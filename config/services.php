@@ -47,4 +47,10 @@ return [
         'redirect' => env('APPLE_REDIRECT_URI'),
     ],
 
+    'supabase' => [
+    'url' => env('SUPABASE_URL'),
+    'key' => env('SUPABASE_KEY'),
+    'bucket' => env('SUPABASE_BUCKET'),
+    ],
+
 ];
