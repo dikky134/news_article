@@ -55,12 +55,17 @@ export default function Article({articles = [], filters = [], categories = [], f
 
     // --- FUNGSI PEMBANTU UNTUK RESOLUSI URL GAMBAR ---
     const getThumbnailUrl = (thumbnailPath) => {
-        if (!thumbnailPath) return '';
-        if (thumbnailPath.startsWith('http://') || thumbnailPath.startsWith('https://')) {
-            return thumbnailPath;
-        }
-        return `/storage/${thumbnailPath}`;
-    };
+    if (!thumbnailPath) return '';
+
+    if (
+        thumbnailPath.startsWith('http://') ||
+        thumbnailPath.startsWith('https://')
+    ) {
+        return thumbnailPath;
+    }
+
+    return `https://ocxvxbjimyqcgndxvnsk.supabase.co/storage/v1/object/public/article-images/${thumbnailPath.replace('thumbnails/', '')}`;
+};
 
     return (
         <MainLayout activePage={(typeof filters.category === 'object' ? filters.category?.slug : filters.category) || "articles"}>

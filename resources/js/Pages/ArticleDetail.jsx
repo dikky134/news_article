@@ -55,6 +55,19 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
         return `${minutes} MIN READ`;
     };
 
+    const getThumbnailUrl = (thumbnailPath) => {
+    if (!thumbnailPath) return '';
+
+    if (
+        thumbnailPath.startsWith('http://') ||
+        thumbnailPath.startsWith('https://')
+    ) {
+        return thumbnailPath;
+    }
+
+    return `https://ocxvxbjimyqcgndxvnsk.supabase.co/storage/v1/object/public/article-images/${thumbnailPath.replace('thumbnails/', '')}`;
+    };
+
     const { data, setData, post, reset, processing, errors } = useForm({
         body: '',
     });
@@ -289,7 +302,7 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                 {/* Hero Image */}
                 <div className="w-full h-[260px] sm:h-[400px] md:h-[500px] lg:h-[600px] mb-8 md:mb-16 relative overflow-hidden group border border-outline-variant/30 dark:border-zinc-800 rounded-sm">
                     <img 
-                        src={article.thumbnail?.startsWith('http') ? article.thumbnail : `/storage/${article.thumbnail}`} 
+                        src={getThumbnailUrl(article.thumbnail)}
                         alt={article.title}
                         className="w-full h-full object-cover grayscale-[0.2] dark:grayscale-[0.4] transition-transform duration-700 group-hover:scale-105"
                     />
@@ -420,7 +433,7 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                                     <Link key={item.id} href={`/articles/${item.slug}`} className="group cursor-pointer block">
                                         <div className="aspect-video mb-2 md:mb-3 overflow-hidden border border-outline-variant dark:border-zinc-800 bg-slate-100 dark:bg-zinc-800">
                                             <img 
-                                                src={item.thumbnail?.startsWith('http') ? item.thumbnail : `/storage/${item.thumbnail}`} 
+                                                src={getThumbnailUrl(item.thumbnail)}
                                                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
                                                 alt={item.title} 
                                             />

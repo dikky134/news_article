@@ -51,6 +51,19 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
         return `${minutes} MIN READ`;
     };
 
+    const getThumbnailUrl = (thumbnailPath) => {
+    if (!thumbnailPath) return '/images/default.jpg';
+
+    if (
+        thumbnailPath.startsWith('http://') ||
+        thumbnailPath.startsWith('https://')
+    ) {
+        return thumbnailPath;
+    }
+
+    return `https://ocxvxbjimyqcgndxvnsk.supabase.co/storage/v1/object/public/article-images/${thumbnailPath.replace('thumbnails/', '')}`;
+};
+
     return (
         <MainLayout activePage="home">
             <Head title="Home | The Modern Broadsheet" />
@@ -122,13 +135,9 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                             <article className="col-span-12 lg:col-span-8 group cursor-pointer">
                                 <Link href={`/articles/${mainHighlight.slug}`}>
                                     <div className="aspect-[16/9] overflow-hidden mb-6 border border-outline-variant bg-surface-container">
-                                        <img 
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 grayscale group-hover:grayscale-0" 
-                                            src={mainHighlight.thumbnail 
-                                                ? (mainHighlight.thumbnail.startsWith('http') 
-                                                    ? mainHighlight.thumbnail 
-                                                    : `/storage/${mainHighlight.thumbnail}`) 
-                                                : '/images/default.jpg'} 
+                                        <img
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 grayscale group-hover:grayscale-0"
+                                            src={getThumbnailUrl(mainHighlight.thumbnail)}
                                             alt={mainHighlight.title}
                                         />
                                     </div>
