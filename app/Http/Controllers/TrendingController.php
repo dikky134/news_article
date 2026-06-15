@@ -13,7 +13,7 @@ class TrendingController extends Controller
         $trendingArticles = \App\Models\Article::with(['category', 'user'])
             ->withCount('views', 'comments')
             ->where('status', 'published')
-            ->orderBy('views_count', 'desc')
+            ->orderBy('articles.views_count', 'desc')
             ->limit(7)
             ->get();
         

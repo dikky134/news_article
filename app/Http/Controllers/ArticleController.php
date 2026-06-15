@@ -10,9 +10,34 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Support\Facades\Http;
 class ArticleController extends Controller
 {
+    private function uploadToSupabase($file)
+{
+    $fileName = time().'_'.$file->getClientOriginalName();
+
+    Http::withHeaders([
+        'apikey' => env('SUPABASE_KEY'),
+        'Authorization' => 'Bearer '.env('SUPABASE_KEY'),
+        'Content-Type' => $file->getMimeType(),
+    ])->withBody(
+        file_get_contents($file->getRealPath()),
+        $file->getMimeType()
+    )->post(
+        env('SUPABASE_URL')
+        . '/storage/v1/object/'
+        . env('SUPABASE_BUCKET')
+        . '/'
+        . $fileName
+    );
+
+    return env('SUPABASE_URL')
+        . '/storage/v1/object/public/'
+        . env('SUPABASE_BUCKET')
+        . '/'
+        . $fileName;
+}
     public function create()
     {
         $drafts = Article::with(['category'])
@@ -60,8 +85,11 @@ class ArticleController extends Controller
 
         $thumbnailPath = null;
         if ($request->hasFile('thumbnail')) {
-            $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
-        }
+        $thumbnailPath = $this->uploadToSupabase(
+        $request->file('thumbnail')
+    );
+}
+        
 
         $slug = Str::slug($request->slug ?: $request->title);
 
@@ -147,8 +175,9 @@ class ArticleController extends Controller
                 Storage::disk('public')->delete($article->thumbnail);
             }
 
-            $path = $request->file('thumbnail')->store('thumbnails', 'public');
-            $validated['thumbnail'] = $path;
+            $validated['thumbnail'] = $this->uploadToSupabase(
+            $request->file('thumbnail')
+            );
         } else {
             unset($validated['thumbnail']); 
         }

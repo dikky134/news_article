@@ -123,6 +123,13 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
         });
     }
 
+    useEffect(() => {
+        document.querySelectorAll('.article-body a').forEach(link => {
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+        });
+    }, [article]);
+
     return (
         <MainLayout activePage={article.category?.slug}>
 
@@ -260,6 +267,35 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                     font-weight: 700 !important;
                     display: inline;
                 }
+
+                .article-content a {
+                    color: #bb0021;
+                    text-decoration: underline;
+                    font-weight: 500;
+                }
+
+                .article-content h2 {
+                    font-size: 22px;
+                    font-weight: 600;
+                    margin: 1.5rem 0;
+                }
+
+                .article-content blockquote {
+                    border-left: 4px solid #bb0021;
+                    padding-left: 16px;
+                    margin: 16px 0;
+                    font-style: italic;
+                }
+
+                .article-content ul {
+                    list-style: disc;
+                    margin-left: 1.5rem;
+                }
+
+                .article-content ol {
+                    list-style: decimal;
+                    margin-left: 1.5rem;
+                }
             `}} />
             
             {/* Reading Progress Bar */}
@@ -323,7 +359,7 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                                 </button>
                             ) : null}
                             
-                            {auth?.user?.id === 1 && (
+                            {auth?.user?.role?.name === 'admin' && (
                                 <>
                                     <div className="w-full h-[1px] bg-outline-variant dark:bg-zinc-800"></div>
                                     <Link 
@@ -462,7 +498,7 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                     </button>
                 ) : null}
                 
-                {auth?.user?.id === 1 && (
+                {auth?.user?.role?.name === 'admin' && (
                     <Link 
                         href={`/articles/${article.id}/edit`}
                         className="text-amber-600 dark:text-amber-500 hover:text-secondary flex items-center"
