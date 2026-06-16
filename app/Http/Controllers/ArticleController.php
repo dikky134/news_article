@@ -280,6 +280,7 @@ class ArticleController extends Controller
                     'content'     => $request->content ?: '',
                     'category_id' => $categoryId, // Mengunci nilai kategori agar tidak terhapus otomatis oleh auto-save
                     'status'      => 'draft',
+                    'thumbnail'   => $request->thumbnail ?: null,
                     'user_id'     => auth()->id(),
                 ]
             );
@@ -293,7 +294,7 @@ class ArticleController extends Controller
             return response()->json([
                 'success' => false,
                 'error'   => $e->getMessage()
-            ], 500);
+            ], 200);
         }
     }
 

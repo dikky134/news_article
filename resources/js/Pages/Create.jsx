@@ -689,7 +689,6 @@ export default function Create({ categories = [], article = null, drafts = [] })
                                         padding-left: 0px !important; }
                                     [contenteditable] ol { list-style-type: decimal !important; margin-left: 1.25rem !important; padding-left: 0px !important; }
                                     [contenteditable] li { display: list-item !important; margin-bottom: 0px !important; margin-top: 0px !important; }
-                                    [contenteditable] p { margin-top: 0px !important; margin-bottom: 0px !important; }
                                     [contenteditable] blockquote {
                                         border-left: 4px solid #bb0021;
                                         padding-left: 16px;
