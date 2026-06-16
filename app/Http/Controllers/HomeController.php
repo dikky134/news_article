@@ -21,10 +21,18 @@ class HomeController extends Controller
             ->skip(1)
             ->take(3)
             ->get();
-
+            
+        $featuredArticles = Article::query()
+            ->with(['category', 'user'])
+            ->where('status', 'published')
+            ->where('feature_on_homepage', true)
+            ->latest()
+            ->get();
+    
         return Inertia::render('Home', [
             'mainHighlight' => $mainHighlight,
             'sideHighlights' => $sideHighlights,
+            'featuredArticles' => $featuredArticles,
         ]);
     }
 }
