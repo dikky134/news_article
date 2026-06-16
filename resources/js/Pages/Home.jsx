@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 
-export default function Home({ mainHighlight, sideHighlights = [] }) {
+export default function Home({ mainHighlight, sideHighlights = [], featuredArticles = [] }) {
     console.log('Main:', mainHighlight);
     console.log('Sides:', sideHighlights);
+    
+
+    const hasFeatured = featuredArticles?.length > 0;
+    const featuredArticle = featuredArticles?.[0];
+    const otherFeatured = featuredArticles?.slice(1);
 
     const articlePages = () => {
         router.get(route('articles.index'));
     };
+    console.log('featuredArticles:', featuredArticles);
 
     const [scrollProgress, setScrollProgress] = useState(0);
     
@@ -122,6 +128,70 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                         </div>
                     </div>
                 </section>
+                {hasFeatured && (
+                        <div className="mb-16 border-4 border-double border-outline-variant dark:border-zinc-800 p-6 bg-zinc-50 dark:bg-zinc-900/30 group">
+                            <Link
+                                href={`/articles/${featuredArticle.slug}`}
+                                className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
+                            >
+                                <div className="md:col-span-7 aspect-[16/9] overflow-hidden border border-outline-variant/30 bg-surface-container">
+                                    <img
+                                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-102"
+                                        src={getThumbnailUrl(featuredArticle.thumbnail)}
+                                        alt={featuredArticle.title}
+                                    />
+                                </div>
+
+                                <div className="md:col-span-5 flex flex-col justify-center">
+                                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.25em] mb-3 block">
+                                        ✦ Editor's Choice / Headline
+                                    </span>
+
+                                    <h2 className="font-display-xl text-3xl md:text-4xl font-serif mb-4 uppercase leading-tight">
+                                        {featuredArticle.title}
+                                    </h2>
+
+                                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6 line-clamp-3 text-justify">
+                                        {featuredArticle.excerpt}
+                                    </p>
+                                </div>
+                            </Link>
+                        </div>
+                    )}
+                {otherFeatured?.length > 0 && (
+                    <section className="pb-section-gap">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {otherFeatured.map((article) => (
+                                <article
+                                    key={article.id}
+                                    className="group cursor-pointer"
+                                >
+                                    <Link href={`/articles/${article.slug}`}>
+                                        <div className="aspect-[16/9] overflow-hidden border border-outline-variant/30 bg-surface-container mb-4">
+                                            <img
+                                                src={getThumbnailUrl(article.thumbnail)}
+                                                alt={article.title}
+                                                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                                            />
+                                        </div>
+
+                                        <span className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] block mb-2">
+                                            Featured Story
+                                        </span>
+
+                                        <h3 className="font-headline-md text-lg leading-tight mb-2 group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors">
+                                            {article.title}
+                                        </h3>
+
+                                        <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                                            {article.excerpt}
+                                        </p>
+                                    </Link>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Featured Highlights */}
                 <section className="py-section-gap">
