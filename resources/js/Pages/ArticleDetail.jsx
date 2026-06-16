@@ -395,29 +395,7 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                         
                         {/* Discussion Section */}
                         <section className="mt-12 md:mt-section-gap mb-5 pt-8 md:pt-12 border-t border-outline-variant dark:border-zinc-800">
-                            <h3 className="font-headline-md text-xl md:text-headline-md mb-6 md:mb-8 italic dark:text-zinc-200">
-                                Discussions ({article.comments?.length || 0})
-                            </h3>
-
                             <div className="space-y-4 md:space-y-6">
-                                {/* List Komentar (Tetap dirender agar komentar lama bisa dibaca meskipun fitur dinonaktifkan sekarang) */}
-                                {article.comments && article.comments.map((comment) => (
-                                    <div key={comment.id} className="flex gap-3 md:gap-4 p-4 md:p-6 bg-slate-50 dark:bg-zinc-900/50 border border-outline-variant/20 dark:border-zinc-800">
-                                        <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-300 dark:bg-zinc-700 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-zinc-300 uppercase">
-                                            {comment.user?.name?.substring(0, 2) || 'AN'}
-                                        </div>
-                                        <div className="flex-grow min-w-0">
-                                            <div className="flex justify-between items-center mb-1 md:mb-2 gap-2">
-                                                <span className="font-bold font-label-caps uppercase text-xs md:text-sm dark:text-zinc-200 truncate">{comment.user?.name}</span>
-                                                <span className="text-slate-400 dark:text-zinc-500 text-[10px] md:text-[11px] flex-shrink-0">
-                                                    {new Date(comment.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs md:text-body-md text-slate-600 dark:text-zinc-400 italic break-words">"{comment.content || comment.body}"</p>
-                                        </div>
-                                    </div>
-                                ))}
-
                                 {/* Pengecekan Fitur Visibilitas allow_comments */}
                                 {article.allow_comments ? (
                                     auth.user ? (
@@ -454,6 +432,28 @@ export default function ArticleDetail({ article, auth, relatedArticles = [] }) {
                                         </p>
                                     </div>
                                 )}
+                                {/* List Komentar (Tetap dirender agar komentar lama bisa dibaca meskipun fitur dinonaktifkan sekarang) */}
+                                <h3 className="font-headline-md text-xl md:text-headline-md mb-6 md:mb-8 italic dark:text-zinc-200">
+                                    Discussions ({article.comments?.length || 0})
+                                </h3>
+                                {article.comments && article.comments.map((comment) => (
+                                    <div key={comment.id} className="flex gap-3 md:gap-4 p-4 md:p-6 bg-slate-50 dark:bg-zinc-900/50 border border-outline-variant/20 dark:border-zinc-800">
+                                        <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-300 dark:bg-zinc-700 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-zinc-300 uppercase">
+                                            {comment.user?.name?.substring(0, 2) || 'AN'}
+                                        </div>
+                                        <div className="flex-grow min-w-0">
+                                            <div className="flex justify-between items-center mb-1 md:mb-2 gap-2">
+                                                <span className="font-bold font-label-caps uppercase text-xs md:text-sm dark:text-zinc-200 truncate">{comment.user?.name}</span>
+                                                <span className="text-slate-400 dark:text-zinc-500 text-[10px] md:text-[11px] flex-shrink-0">
+                                                    {new Date(comment.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs md:text-body-md text-slate-600 dark:text-zinc-400 italic break-words">"{comment.content || comment.body}"</p>
+                                            <Link className="mt-4 mr-5 text-slate-400 dark:text-zinc-500 text-[10px] md:text-[11px] flex-shrink-0">BALAS</Link>
+                                            <Link className="mt-4 mr-5 text-slate-400 dark:text-zinc-500 text-[10px] md:text-[11px] flex-shrink-0">Hapus</Link>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </section>
                     </article>
