@@ -8,9 +8,12 @@ use Illuminate\Support\Facades\Auth;
 
 class IsAdmin
 {
+    /**
+     * Menjalankan prosedur pemeriksaan validasi peran pengguna melalui pengecekan nama relasi.
+     */
     public function handle(Request $request, Closure $next)
     {
-        // Pastikan login DAN punya role admin
+        // Memeriksa autentikasi dan mencocokkan kepemilikan relasi penamaan 'admin'.
         if (Auth::check() && Auth::user()->role && Auth::user()->role->name === 'admin') {
             return $next($request);
         }
