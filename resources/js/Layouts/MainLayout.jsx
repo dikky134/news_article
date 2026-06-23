@@ -4,19 +4,23 @@ import EditorialSkeleton from '@/Pages/EditorialSkeleton';
 import axios from 'axios';
 
 export default function MainLayout({ children, activePage, categories = [] }) {
+    // Fungsi: Mengelola state visibilitas (buka/tutup) menu navigasi pada tampilan perangkat seluler
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    
+    // Fungsi: Menginisialisasi dan menyimpan preferensi tema (Terang/Gelap) dari penyimpanan lokal browser
     const [isDark, setIsDark] = useState(() => {
         if (typeof window !== 'undefined') {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme) return savedTheme === 'dark';
-            
             return window.matchMedia('(prefers-color-scheme: dark)').matches;
         }
         return false;
     });
 
+    // Fungsi: Mengelola state untuk mengaktifkan antarmuka memuat (loading) saat berpindah halaman
     const [isPageLoading, setIsPageLoading] = useState(false);
 
+    // Fungsi: Menerapkan kelas CSS 'dark' ke elemen root HTML agar mode gelap Tailwind aktif
     useEffect(() => {
         const root = window.document.documentElement;
         if (isDark) {
@@ -28,6 +32,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
         }
     }, [isDark]);
 
+    // Fungsi: Mengaitkan event listener Inertia.js untuk mendeteksi awal dan akhir perpindahan halaman
     useEffect(() => {
         const startProgress = () => setIsPageLoading(true);
         const endProgress = () => setIsPageLoading(false);
@@ -41,13 +46,17 @@ export default function MainLayout({ children, activePage, categories = [] }) {
         };
     }, []);
 
+    // Fungsi: Membalikkan nilai boolean tema untuk beralih antara mode Terang dan Gelap
     const toggleTheme = () => setIsDark(!isDark);
     
+    // Fungsi: Mengelola state visibilitas pop-up kategori menu
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     
+    // Fungsi: Menarik data identitas otentikasi pengguna yang dibagikan secara global dari backend
     const { auth } = usePage().props;
     const user = auth?.user ?? null;
 
+    // Fungsi: Mengamankan ekstraksi string nama peran pengguna untuk menghindari error jika data tidak tersedia
     const getRoleName = (roleData) => {
         if (!roleData) return '';
         if (typeof roleData === 'object') {
@@ -56,15 +65,14 @@ export default function MainLayout({ children, activePage, categories = [] }) {
         return roleData;
     };
 
-    const { data, setData } = useForm({
-        search: '',
-    });
-    
+    // Fungsi: Menginisialisasi state formulir khusus untuk komponen mesin pencari (search bar)
+    const { data, setData } = useForm({ search: '' });
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const searchContainerRef = useRef(null);
 
+    // Fungsi: Memproses penelusuran API secara real-time dengan menunda eksekusi (debounce) selama 300ms
     useEffect(() => {
         if (!data.search.trim()) {
             setSearchResults([]);
@@ -90,6 +98,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
         return () => clearTimeout(delaySearchTimer);
     }, [data.search]);
 
+    // Fungsi: Menutup kotak hasil pencarian secara otomatis jika pengguna mengklik area luar elemen
     useEffect(() => {
         function handleClickOutside(event) {
             if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
@@ -100,33 +109,31 @@ export default function MainLayout({ children, activePage, categories = [] }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Fungsi: Mengarahkan pengguna menuju halaman indeks artikel menggunakan query pencarian saat form di-submit
     const handleSearch = (e) => {
         if (e) e.preventDefault();
         setShowDropdown(false);
-        setIsMobileMenuOpen(false); // Tutup menu mobile jika menekan Enter
-        router.get(route('articles.index'), 
+        setIsMobileMenuOpen(false);
+        router.get('/articles', 
             { search: data.search }, 
-            { 
-                preserveState: true, 
-                replace: true 
-            }
+            { preserveState: true, replace: true }
         );
     };
 
     return (
         <div className="w-full min-h-screen overflow-x-hidden bg-background text-on-background font-body-md bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800">
             
-            {/* Header / Navbar */}
+            {/* Fungsi: Kerangka utama header website yang posisinya ditetapkan paling atas (z-50) */}
             <header className="w-full bg-surface border-b border-outline-variant dark:border-b dark:border-on-secondary dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800 relative z-50">
-                <div className="flex justify-between items-center w-full px-4 md:px-margin-edge max-w-content-max-width mx-auto">
+                <div className="flex justify-between items-center w-full px-4 md:px-margin-edge max-w-content-max-width mx-auto h-20">
                     
-                    {/* Logo */}
-                    <div className="font-display-xl text-headline-md font-bold tracking-tighter py-6">
+                    {/* Fungsi: Menampilkan tipografi logo website, diamankan dari penyusutan dengan flex-shrink-0 */}
+                    <div className="font-display-xl text-headline-md font-bold tracking-tighter flex-shrink-0 pr-4">
                         <Link href="/">The Modern Broadsheet</Link>
                     </div>
 
-                    {/* Navigasi Utama (Desktop Only) */}
-                    <nav className="hidden md:flex items-center gap-8 h-full">
+                    {/* Fungsi: Barisan tautan navigasi menu utama yang hanya tampil pada layar besar (Desktop) */}
+                    <nav className="hidden lg:flex items-center gap-8 h-full pl-4">
                         <Link 
                             href="/" 
                             className={`relative py-6 transition-colors font-medium flex items-center group ${
@@ -147,7 +154,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                         {['articles', 'trending', 'about'].map((item) => (
                             <Link 
                                 key={item}
-                                href={item === 'articles' ? route('articles.index') : `/${item}`} 
+                                href={`/${item}`} 
                                 className={`relative py-6 transition-colors font-medium flex items-center group ${
                                     activePage === item 
                                         ? 'text-secondary dark:text-amber-500' 
@@ -165,14 +172,14 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                         ))}
                     </nav>
                         
-                    {/* Search & Actions (Kanan) */}
-                    <div className="flex items-center gap-6 py-6">
+                    {/* Fungsi: Membungkus elemen search, info akun, dan kontrol UI secara horizontal sejajar tanpa menumpuk */}
+                    <div className="flex items-center gap-4 py-6 whitespace-nowrap">
                         
-                        {/* INPUT LIVE SEARCH DESKTOP */}
-                        <div ref={searchContainerRef} className="hidden lg:block relative">
+                        {/* Fungsi: Menampilkan kotak input formulir pencarian artikel */}
+                        <div ref={searchContainerRef} className="hidden lg:block relative flex-shrink-0">
                             <form onSubmit={handleSearch}>
                                 <input 
-                                    className="bg-transparent border-b border-outline px-2 py-1 focus:outline-none focus:border-primary text-body-md w-32 focus:w-48 transition-all dark:border-zinc-700 dark:focus:border-amber-500" 
+                                    className="bg-transparent border-b border-outline px-2 py-1 focus:outline-none focus:border-primary text-xs w-28 xl:w-48 transition-all dark:border-zinc-700 dark:focus:border-amber-500" 
                                     placeholder="Search..." 
                                     type="text"
                                     value={data.search}
@@ -184,7 +191,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                 )}
                             </form>
 
-                            {/* DROPDOWN OVERLAY HASIL PENCARIAN DESKTOP */}
+                            {/* Fungsi: Menampilkan hasil pencarian prediktif dalam kotak melayang (dropdown) */}
                             {showDropdown && (
                                 <div className="absolute right-0 mt-3 w-72 md:w-80 bg-white dark:bg-zinc-900 border border-outline-variant dark:border-zinc-800 shadow-xl z-50 max-h-64 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800 rounded-sm">
                                     {searchResults.length === 0 ? (
@@ -195,7 +202,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                         searchResults.map((result) => (
                                             <Link 
                                                 key={result.id} 
-                                                href={`/articles/${result.id}/edit`} 
+                                                href={`/articles/${result.slug}`} 
                                                 onClick={() => setShowDropdown(false)}
                                                 className="p-3 hover:bg-slate-50 dark:hover:bg-zinc-800 transition flex items-center justify-between gap-3 text-left block w-full group"
                                             >
@@ -226,56 +233,84 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                             )}
                         </div>
 
-                        {/* Area Otentikasi User (Desktop Only) */}
-                        <div className="hidden md:flex items-center gap-6">
+                        {/* Fungsi: Menyusun tata letak status akun dan identitas pengguna khusus perangkat Desktop */}
+                        <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
                             {user ? (
                             <>
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[10px] font-bold text-secondary dark:text-amber-500 uppercase tracking-widest">
-                                        {getRoleName(user.role)}
-                                    </span>
-                                    <span className="text-sm font-medium uppercase tracking-tighter italic">
+                                {/* Fungsi: Memunculkan menu rahasia (Admin Panel) secara eksklusif hanya untuk pemegang Role ID 3 */}
+                                {user.role_id === 3 && (
+                                    <div className="flex items-center gap-3 border-r border-zinc-300 dark:border-zinc-700 pr-3">
+                                        <Link 
+                                            href="/admin/users" 
+                                            className="text-[10px] font-bold text-zinc-500 hover:text-secondary dark:hover:text-amber-500 uppercase tracking-widest transition-colors"
+                                        >
+                                            Kelola User
+                                        </Link>
+                                        <Link 
+                                            href="/admin/suggestions" 
+                                            className="text-[10px] font-bold text-zinc-500 hover:text-secondary dark:hover:text-amber-500 uppercase tracking-widest transition-colors"
+                                        >
+                                            Inbox Saran
+                                        </Link>
+                                    </div>
+                                )}
+
+                                {/* Fungsi: Mencetak identitas lencana tingkat kewenangan (Badge) berdampingan dengan nama profil */}
+                                <div className="flex items-center gap-2 border-r border-zinc-300 dark:border-zinc-700 pr-3">
+                                    {user.role_id === 3 ? (
+                                        <span className="text-[8px] font-bold bg-red-600 text-white px-1.5 py-0.5 rounded-sm uppercase tracking-widest">
+                                            Super Admin
+                                        </span>
+                                    ) : user.role_id === 1 ? (
+                                        <span className="text-[8px] font-bold bg-amber-500 text-black px-1.5 py-0.5 rounded-sm uppercase tracking-widest">
+                                            Admin
+                                        </span>
+                                    ) : null}
+                                    <span className="text-sm font-medium uppercase tracking-tighter italic truncate max-w-[120px]">
                                         {user.name}
                                     </span>
                                 </div>
 
-                                {getRoleName(user.role) === 'admin' && (
+                                {/* Fungsi: Mengamankan hak rute akses pengajuan tulisan artikel murni untuk jajaran editorial */}
+                                {[1, 3].includes(user.role_id) && (
                                     <Link 
                                         href="/create" 
-                                        className="bg-primary dark:bg-on-secondary text-white dark:text-primary px-4 py-2 text-[10px] font-bold tracking-widest uppercase hover:bg-secondary dark:hover:bg-amber-500 transition-all"
+                                        className="bg-primary dark:bg-on-secondary text-white dark:text-primary px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase hover:bg-secondary dark:hover:bg-amber-500 transition-all"
                                     >
                                         + Write Story
                                     </Link>
                                 )}
 
+                                {/* Fungsi: Menyediakan rute fungsional untuk mengakhiri sesi autentikasi */}
                                 <Link 
                                     href={route('logout')} 
                                     method="post" 
                                     as="button" 
-                                    className="text-sm font-medium hover:text-red-600 transition-colors cursor-pointer"
+                                    className="text-sm font-medium hover:text-red-600 transition-colors cursor-pointer ml-1"
                                 >
                                     Logout
                                 </Link>
                             </>
                             ) : (
+                                // Fungsi: Memunculkan rute formulir masuk bagi pengunjung tak dikenal (Tamu)
                                 <a 
                                     href="/login"
-                                    className="font-bold text-[11px] hover:text-secondary dark:hover:text-amber-500 tracking-widest uppercase italic cursor-pointer"
+                                    className="font-bold text-[11px] hover:text-secondary dark:hover:text-amber-500 tracking-widest uppercase italic cursor-pointer pl-4 border-l border-zinc-300 dark:border-zinc-700"
                                 >
                                     Sign In
                                 </a>
                             )}
                         </div>
 
-                        {/* Menu & Tombol Pengubah Tema */}
-                        <div className="flex items-center gap-4">
+                        {/* Fungsi: Menyematkan tombol kendali penyesuaian tema visual dan tuas buka-tutup navigasi seluler */}
+                        <div className="flex items-center gap-1 pl-2">
                             <button 
                                 onClick={toggleTheme}
                                 className="p-2 rounded-full hover:bg-surface-container dark:hover:bg-zinc-800 transition-colors duration-200 text-on-surface-variant dark:text-gray-300 cursor-pointer flex items-center justify-center"
                                 type="button"
                                 title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
                             >
-                                <span className="material-symbols-outlined text-[22px]">
+                                <span className="material-symbols-outlined text-[20px]">
                                     {isDark ? 'light_mode' : 'dark_mode'}
                                 </span>
                             </button>
@@ -283,9 +318,9 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                             <button
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                                 type="button"
-                                className="md:hidden p-2 text-primary dark:text-white focus:outline-none cursor-pointer flex items-center justify-center"
+                                className="lg:hidden p-2 text-primary dark:text-white focus:outline-none cursor-pointer flex items-center justify-center"
                             >
-                                <span className="material-symbols-outlined text-[26px]">
+                                <span className="material-symbols-outlined text-[24px]">
                                     {isMobileMenuOpen ? 'close' : 'menu'}
                                 </span>
                             </button>
@@ -293,15 +328,15 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                     </div>
                 </div>
 
-                {/* Panel Menu Drop-Down Mobile */}
+                {/* Fungsi: Merender keseluruhan tautan navigasi website di dalam kerangka dropdown khusus ukuran smartphone */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 w-full bg-surface dark:bg-[#121212] border-b border-outline-variant dark:border-zinc-800 px-6 py-6 shadow-xl space-y-4 z-50">
+                    <div className="lg:hidden absolute top-full left-0 w-full bg-surface dark:bg-[#121212] border-b border-outline-variant dark:border-zinc-800 px-6 py-6 shadow-xl space-y-4 z-50">
                         
-                        {/* FORM SEARCH UTK MOBILE */}
+                        {/* Fungsi: Menyediakan modul formulir penelusuran versi vertikal */}
                         <div className="relative w-full mb-4">
                             <form onSubmit={handleSearch}>
                                 <input 
-                                    className="w-full bg-transparent border-b border-outline px-2 py-2 focus:outline-none focus:border-primary text-body-md dark:border-zinc-700 dark:text-white" 
+                                    className="w-full bg-transparent border-b border-outline px-2 py-2 text-sm dark:border-zinc-700 dark:text-white" 
                                     placeholder="Search articles..." 
                                     type="text"
                                     value={data.search}
@@ -313,7 +348,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                 )}
                             </form>
 
-                            {/* DROPDOWN OVERLAY HASIL PENCARIAN MOBILE */}
+                            {/* Fungsi: Menampilkan blok hasil penelusuran secara dinamis */}
                             {showDropdown && (
                                 <div className="absolute left-0 right-0 mt-2 w-full bg-white dark:bg-zinc-900 border border-outline-variant dark:border-zinc-800 shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800 rounded-sm">
                                     {searchResults.length === 0 ? (
@@ -324,7 +359,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                         searchResults.map((result) => (
                                             <Link 
                                                 key={result.id} 
-                                                href={`/articles/${result.id}/edit`} 
+                                                href={`/articles/${result.slug}`} 
                                                 onClick={() => {
                                                     setShowDropdown(false);
                                                     setIsMobileMenuOpen(false);
@@ -358,7 +393,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                             )}
                         </div>
 
-                        {/* LINK NAVIGASI UTAMA MOBILE */}
+                        {/* Fungsi: Menyusun daftar perlintasan akses halaman utama secara bersusun */}
                         <div className="flex flex-col gap-3 font-medium">
                             <Link 
                                 href="/" 
@@ -371,7 +406,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                             {['articles', 'trending', 'about'].map((item) => (
                                 <Link 
                                     key={item}
-                                    href={item === 'articles' ? route('articles.index') : `/${item}`} 
+                                    href={`/${item}`} 
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className={`py-2 border-b border-zinc-100 dark:border-zinc-900 capitalize ${activePage === item ? 'text-secondary dark:text-amber-500' : 'text-primary dark:text-white'}`}
                                 >
@@ -379,13 +414,35 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                 </Link>
                             ))}
 
-                            {/* AUTHENTICATION LINKS UNTUK MOBILE */}
+                            {/* Fungsi: Mendeklarasikan identitas profil maupun kontrol pengelolaan sesi login pengguna perangkat bergerak */}
                             {user ? (
                                 <div className="pt-2 space-y-3">
                                     <div className="text-xs text-zinc-400">
-                                        Signed in as <span className="font-bold text-primary dark:text-white">{user.name}</span> ({getRoleName(user.role)})
+                                        Signed in as <span className="font-bold text-primary dark:text-white">{user.name}</span> ({user.role_id === 3 ? 'Super Admin' : user.role_id === 1 ? 'Admin' : 'User'})
                                     </div>
-                                    {getRoleName(user.role) === 'admin' && (
+                                    
+                                    {/* Fungsi: Memisahkan aksesibilitas pengelolaan sistem spesifik untuk hierarki puncak (Super Admin) */}
+                                    {user.role_id === 3 && (
+                                        <div className="grid grid-cols-2 gap-2 mb-2">
+                                            <Link 
+                                                href="/admin/users" 
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className="block text-center bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 p-2 text-[10px] font-bold uppercase tracking-wider"
+                                            >
+                                                Kelola User
+                                            </Link>
+                                            <Link 
+                                                href="/admin/suggestions" 
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className="block text-center bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 p-2 text-[10px] font-bold uppercase tracking-wider"
+                                            >
+                                                Inbox Saran
+                                            </Link>
+                                        </div>
+                                    )}
+
+                                    {/* Fungsi: Menempatkan rute pelemparan halaman penulisan artikel */}
+                                    {[1, 3].includes(user.role_id) && (
                                         <Link 
                                             href="/create" 
                                             onClick={() => setIsMobileMenuOpen(false)}
@@ -394,6 +451,8 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                             + Write Story
                                         </Link>
                                     )}
+                                    
+                                    {/* Fungsi: Menyediakan tuas pemutusan rantai sesi autentikasi */}
                                     <Link 
                                         href={route('logout')} 
                                         method="post" 
@@ -405,6 +464,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                     </Link>
                                 </div>
                             ) : (
+                                /* Fungsi: Menyediakan rute gerbang masuk sistem khusus pengguna perangkat seluler */
                                 <Link 
                                     href="/login" 
                                     onClick={() => setIsMobileMenuOpen(false)}
@@ -418,12 +478,12 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                 )}
             </header>
 
-            {/* Click Overlay */}
+            {/* Fungsi: Meredupkan area latar belakang manakala interaksi dialog kategori difungsikan */}
             {isCategoryOpen && (
                 <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsCategoryOpen(false)}></div>
             )}
 
-            {/* Main Content Area */}
+            {/* Fungsi: Merancang wadah utama perepresentasi konten fleksibel di antara bilah navigasi dan catatan kaki */}
             <main className="w-full overflow-x-hidden max-w-content-max-width mx-auto px-4 md:px-margin-edge py-12 min-h-[60vh] bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-zinc-800">
                 {isPageLoading ? (
                     <EditorialSkeleton />
@@ -432,17 +492,30 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                 )}
             </main>
 
-            {/* Footer */}
+            {/* Fungsi: Mengkonstruksi wilayah penutup halaman sebagai media penampil hak kepemilikan komersial */}
             <footer className="w-full bg-surface dark:bg-[#121212] text-primary dark:text-white border-outline-variant dark:border-on-secondary px-margin-edge py-16 flex flex-col items-center border-t border-outline-variant bg-surface-container-lowest m-0">
                 <div className="max-w-content-max-width w-full flex flex-col items-center text-center">
                     <div className="font-display-xl text-headline-md mb-8">The Modern Broadsheet</div>
-                    <nav className="flex flex-wrap justify-center gap-x-12 gap-y-4 mb-12">
+                    <nav className="flex flex-wrap justify-center gap-x-12 gap-y-4 mb-8">
                         {['Privacy Policy', 'Terms of Service', 'Contact Us', 'Newsletter'].map(link => (
                             <a key={link} className="font-label-caps text-label-caps hover:underline hover:text-secondary dark:hover:text-amber-500 transition-all" href="#">
                                 {link}
                             </a>
                         ))}
                     </nav>
+
+                    {/* Fungsi: Membukakan gerbang dialog penyaluran opini publik khusus pengguna terotentikasi */}
+                    {user && (
+                        <div className="mb-12">
+                            <Link 
+                                href="/suggestions/create" 
+                                className="font-label-caps text-[11px] border border-secondary dark:border-amber-500 text-secondary dark:text-amber-500 px-4 py-2 hover:bg-secondary hover:text-white dark:hover:bg-amber-500 dark:hover:text-black transition-colors"
+                            >
+                                Kirim Saran & Masukan
+                            </Link>
+                        </div>
+                    )}
+                    
                     <div className="font-body-md text-sm">
                         © 2026 The Modern Broadsheet. All editorial rights reserved.
                     </div>
