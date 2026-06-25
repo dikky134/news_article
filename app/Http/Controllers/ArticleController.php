@@ -265,36 +265,68 @@ class ArticleController extends Controller
     public function autoSave(Request $request)
     {
         try {
+
             $title = $request->title ?: 'Untitled Draft';
-            
-            // Ambil category_id lama dari database jika di request bernilai kosong
-            $existingArticle = $request->id ? Article::find($request->id) : null;
-            $categoryId = $request->category_id ?: ($existingArticle?->category_id ?? null);
+
+            $existingArticle = $request->id
+                ? Article::find($request->id)
+                : null;
+
+            $categoryId = $request->category_id
+                ?: ($existingArticle?->category_id);
+
+            // gunakan thumbnail lama
+            $thumbnail = $existingArticle?->thumbnail;
+
+            // jika ada file baru, upload ke Supabase
+            if ($request->hasFile('thumbnail')) {
+
+                $thumbnail = $this->uploadToSupabase(
+                    $request->file('thumbnail')
+                );
+
+            }
 
             $article = Article::updateOrCreate(
-                ['id' => $request->id], 
+
+                ['id' => $request->id],
+
                 [
+
                     'title'       => $title,
-                    'slug'        => $request->slug ?: Str::slug($title) . '-' . time(),
+
+                    'slug'        => $request->slug
+                        ?: Str::slug($title) . '-' . time(),
+
                     'excerpt'     => $request->excerpt ?: '',
+
                     'content'     => $request->content ?: '',
-                    'category_id' => $categoryId, // Mengunci nilai kategori agar tidak terhapus otomatis oleh auto-save
+
+                    'category_id' => $categoryId,
+
+                    'thumbnail'   => $thumbnail,
+
                     'status'      => 'draft',
-                    'thumbnail'   => $request->thumbnail ?: null,
+
                     'user_id'     => auth()->id(),
+
                 ]
+
             );
 
             return response()->json([
-                'success'    => true,
-                'article_id' => $article->id
-            ], 200);
+                'success' => true,
+                'article_id' => $article->id,
+                'thumbnail' => $thumbnail,
+            ]);
 
         } catch (\Exception $e) {
+
             return response()->json([
                 'success' => false,
-                'error'   => $e->getMessage()
-            ], 200);
+                'error' => $e->getMessage(),
+            ],500);
+
         }
     }
 
