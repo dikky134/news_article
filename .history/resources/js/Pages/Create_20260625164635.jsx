@@ -638,7 +638,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
                             type="button"
                             onClick={handlePublish}
                             disabled={processing}
-                            className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-secondary dark:bg-on-secondary dark:hover:bg-amber-600 text-white dark:text-primary font-label-caps text-[11px] md:text-label-caps hover:shadow-lg transition-all disabled:opacity-50 uppercase tracking-widest cursor-pointer"
+                            className="w-full sm:w-auto px-6 py-3 bg-primary dark:hover:bg-amber-600 text-white font-label-caps text-[11px] md:text-label-caps hover:shadow-lg transition-all disabled:opacity-50 uppercase tracking-widest cursor-pointer"
                         >
                             {processing ? 'Publishing...' : isEditMode ? 'Update & Publish' : 'Publish Article'}
                         </button>
@@ -858,7 +858,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
                                     <span className="text-sm dark:text-zinc-300">Feature on Homepage</span>
                                     <div 
                                         onClick={() => setData('feature_on_homepage', !data.feature_on_homepage)}
-                                        className={`w-10 h-5 rounded-full flex items-center px-1 cursor-pointer transition-colors ${data.feature_on_homepage ? 'bg-secondary dark:bg-amber-500 justify-end' : 'bg-zinc-700 justify-start'}`}
+                                        className={`w-10 h-5 rounded-full flex items-center px-1 cursor-pointer transition-colors ${data.feature_on_homepage ? 'bg-amber-500 justify-end' : 'bg-zinc-700 justify-start'}`}
                                     >
                                         <div className="w-3 h-3 bg-white rounded-full"></div>
                                     </div>
@@ -887,7 +887,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
 
                                 <div className="p-4 md:p-5 space-y-2.5">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-label-caps tracking-wider text-secondary dark:text-amber-600 dark:text-amber-500 font-bold uppercase">
+                                        <span className="text-[10px] font-label-caps tracking-wider text-amber-600 dark:text-amber-500 font-bold uppercase">
                                             {categories && categories.find(c => String(c.id) === String(data?.category_id))?.name || 'Uncategorized'}
                                         </span>
                                     </div>

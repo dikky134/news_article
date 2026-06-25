@@ -1,32 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 
-export default function Article({articles = [], filters = [], categories = [], featuredArticles = [] }) 
+export default function Article({articles = [], filters = {}, categories = [], featuredArticles = [] }) 
 {   
     const hasFeatured = featuredArticles && featuredArticles.length > 0;
     const filteredArticles = hasFeatured 
         ? articles.filter(art => art.id !== featuredArticles[0].id)
         : articles;
 
-    const featuredArticle = filteredArticles[0]; // Artikel bento paling besar
-    const sideArticles = filteredArticles.slice(1, 4); // Artikel posisi samping
-    const bottomArticles = filteredArticles.slice(4); // Sisa artikel ke bawah
+    const INITIAL_COUNT = 7;
+    const LOAD_COUNT = 6;
 
+    const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
     const [scrollProgress, setScrollProgress] = useState(0);
+
+    const featuredArticle = filteredArticles[0];
+    const sideArticles = filteredArticles.slice(1, 4);
+
+    const bottomArticles = filteredArticles.slice(4);
+
+    const visibleBottomArticles = bottomArticles.slice(
+        0,
+        Math.max(visibleCount - 4, 0)
+    );
+
+    useEffect(() => {
+        setVisibleCount(INITIAL_COUNT);
+    }, [articles]);
 
     useEffect(() => {
         const handleScroll = () => {
-            const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-            if (totalScroll > 0) {
-                const currentScroll = window.scrollY;
-                const progress = (currentScroll / totalScroll) * 100;
-                setScrollProgress(progress);
+            const total =
+                document.documentElement.scrollHeight - window.innerHeight;
+            if (total <= 0) {
+                setScrollProgress(0);
+                return;
             }
+            setScrollProgress((window.scrollY / total) * 100);
         };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        handleScroll();
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     console.log("Filters aktif:", filters);
@@ -64,6 +79,7 @@ export default function Article({articles = [], filters = [], categories = [], f
         return thumbnailPath;
     }
 
+    console.log("visibleCount =", visibleCount);
     return `https://ocxvxbjimyqcgndxvnsk.supabase.co/storage/v1/object/public/article-images/${thumbnailPath.replace('thumbnails/', '')}`;
 };
 
@@ -227,7 +243,7 @@ export default function Article({articles = [], filters = [], categories = [], f
                         )}
 
                         {/* Side Bento Column */}
-                        <div className="md:col-span-4 flex flex-col gap-gutter">
+                        <div className="md:col-span-4 flex flex-col gap-gutter border-l-0 md:border-l border-outline-variant pl-0 md:pl-gutter pb-6 md:pb-0 border-b md:border-b-0 mb-6 md:mb-0">
                             {sideArticles.map((item) => (
                                 <article key={item.id} className="group cursor-pointer border-b border-outline-variant pb-6">
                                     <Link href={`/articles/${item.slug}`}>
@@ -257,7 +273,7 @@ export default function Article({articles = [], filters = [], categories = [], f
                         </div>
 
                         {/* Lower Grid Row */}
-                        {bottomArticles.map((item) => (
+                        {visibleBottomArticles.map((item) => (
                             <article key={item.id} className="md:col-span-4 group cursor-pointer mt-8">
                                 <Link href={`/articles/${item.slug}`}>
                                     <div className="aspect-[16/9] md:aspect-square border border-outline-variant/30 mb-6 overflow-hidden bg-surface-container">
@@ -300,13 +316,38 @@ export default function Article({articles = [], filters = [], categories = [], f
                 {articles.length > 0 && (
                     <div className="mt-24 border-t border-outline-variant py-12 flex justify-between items-center">
                         <span className="font-label-caps text-label-caps text-on-surface-variant">
-                            Showing {articles.length} Articles
+                            Showing {Math.min(visibleCount, filteredArticles.length)} of {filteredArticles.length} Articles
                         </span>
                         <div className="flex gap-4">
-                            <button className="border border-outline px-8 py-3 font-label-caps text-label-caps hover:bg-surface-container dark:hover:text-primary transition-colors font-bold uppercase">
+                            <button
+                                onClick={() =>
+                                    setVisibleCount(prev =>
+                                        Math.max(INITIAL_COUNT, prev - LOAD_COUNT)
+                                    )
+                                }
+                                disabled={visibleCount <= INITIAL_COUNT}
+                                className={`border border-outline px-8 py-3 font-label-caps text-label-caps hover:bg-surface-container dark:hover:text-primary transition-colors font-bold uppercase ${
+                                    visibleCount <= INITIAL_COUNT
+                                        ? "opacity-40 cursor-not-allowed"
+                                        : "hover:bg-surface-container cursor-pointer"
+                                }`}
+                            >
                                 Previous
                             </button>
-                            <button className="bg-primary dark:bg-on-secondary text-on-primary dark:text-primary px-8 py-3 font-label-caps text-label-caps hover:bg-secondary dark:hover:bg-amber-500 transition-colors font-bold uppercase">
+
+                            <button
+                                onClick={() =>
+                                    setVisibleCount(prev =>
+                                        Math.min(filteredArticles.length + 4, prev + LOAD_COUNT)
+                                    )
+                                }
+                                disabled={visibleCount >= filteredArticles.length + 4}
+                                className={`bg-primary dark:bg-on-secondary text-on-primary dark:text-primary px-8 py-3 font-label-caps text-label-caps hover:bg-secondary dark:hover:bg-amber-500 transition-colors font-bold uppercase ${
+                                    visibleCount >= filteredArticles.length + 4
+                                        ? "opacity-40 cursor-not-allowed"
+                                        : "bg-primary text-white hover:bg-secondary cursor-pointer"
+                                }`}
+                            >
                                 Load More
                             </button>
                         </div>

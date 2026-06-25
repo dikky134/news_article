@@ -887,7 +887,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
 
                                 <div className="p-4 md:p-5 space-y-2.5">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-label-caps tracking-wider text-secondary dark:text-amber-600 dark:text-amber-500 font-bold uppercase">
+                                        <span className="text-[10px] font-label-caps tracking-wider text-amber-600 dark:text-amber-500 font-bold uppercase">
                                             {categories && categories.find(c => String(c.id) === String(data?.category_id))?.name || 'Uncategorized'}
                                         </span>
                                     </div>

@@ -128,12 +128,12 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                 <div className="flex justify-between items-center w-full px-4 md:px-margin-edge max-w-content-max-width mx-auto h-20">
                     
                     {/* Fungsi: Menampilkan tipografi logo website, diamankan dari penyusutan dengan flex-shrink-0 */}
-                    <div className="font-display-xl text-headline-md font-bold tracking-tighter flex-shrink-0 pr-2">
+                    <div className="font-display-xl text-headline-md font-bold tracking-tighter flex-shrink-0 pr-4">
                         <Link href="/">The Modern Broadsheet</Link>
                     </div>
 
                     {/* Fungsi: Barisan tautan navigasi menu utama yang hanya tampil pada layar besar (Desktop) */}
-                    <nav className="hidden lg:flex items-center gap-8 h-full pl-4 pr-4">
+                    <nav className="hidden lg:flex items-center gap-8 h-full pl-4">
                         <Link 
                             href="/" 
                             className={`relative py-6 transition-colors font-medium flex items-center group ${

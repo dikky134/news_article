@@ -858,7 +858,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
                                     <span className="text-sm dark:text-zinc-300">Feature on Homepage</span>
                                     <div 
                                         onClick={() => setData('feature_on_homepage', !data.feature_on_homepage)}
-                                        className={`w-10 h-5 rounded-full flex items-center px-1 cursor-pointer transition-colors ${data.feature_on_homepage ? 'bg-secondary dark:bg-amber-500 justify-end' : 'bg-zinc-700 justify-start'}`}
+                                        className={`w-10 h-5 rounded-full flex items-center px-1 cursor-pointer transition-colors ${data.feature_on_homepage ? 'bg-amber-500 justify-end' : 'bg-zinc-700 justify-start'}`}
                                     >
                                         <div className="w-3 h-3 bg-white rounded-full"></div>
                                     </div>
@@ -887,7 +887,7 @@ export default function Create({ categories = [], article = null, drafts = [] })
 
                                 <div className="p-4 md:p-5 space-y-2.5">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-label-caps tracking-wider text-secondary dark:text-amber-600 dark:text-amber-500 font-bold uppercase">
+                                        <span className="text-[10px] font-label-caps tracking-wider text-amber-600 dark:text-amber-500 font-bold uppercase">
                                             {categories && categories.find(c => String(c.id) === String(data?.category_id))?.name || 'Uncategorized'}
                                         </span>
                                     </div>

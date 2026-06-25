@@ -230,7 +230,7 @@ export default function Home({ mainHighlight, sideHighlights = [], featuredArtic
                         )}
 
                         {/* Side Highlights (Dinamis) */}
-                        <div className="col-span-12 lg:col-span-4 flex flex-col gap-10">
+                        <div className="col-span-12 lg:col-span-4 flex flex-col gap-10 border-l-0 md:border-l border-outline-variant pl-0 md:pl-gutter pb-6 md:pb-0 border-b md:border-b-0 mb-6 md:mb-0">
                             {sideHighlights.map((item) => (
                                 <article key={item.id} className="group cursor-pointer border-b border-outline-variant pb-8 last:border-0 last:pb-0">
                                     <Link href={`/articles/${item.slug}`}>

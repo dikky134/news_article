@@ -133,7 +133,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                     </div>
 
                     {/* Fungsi: Barisan tautan navigasi menu utama yang hanya tampil pada layar besar (Desktop) */}
-                    <nav className="hidden lg:flex items-center gap-8 h-full pl-4 pr-4">
+                    <nav className="hidden lg:flex items-center gap-8 h-full pl-4">
                         <Link 
                             href="/" 
                             className={`relative py-6 transition-colors font-medium flex items-center group ${
