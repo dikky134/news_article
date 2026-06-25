@@ -1,13 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 
-export default function Home({ mainHighlight, sideHighlights = [] }) {
+export default function Home({ mainHighlight, sideHighlights = [], featuredArticles = [] }) {
     console.log('Main:', mainHighlight);
     console.log('Sides:', sideHighlights);
+    
+
+    const hasFeatured = featuredArticles?.length > 0;
+    const featuredArticle = featuredArticles?.[0];
+    const otherFeatured = featuredArticles?.slice(1);
+
+    const articlePages = () => {
+        router.get(route('articles.index'));
+    };
+    console.log('featuredArticles:', featuredArticles);
 
     const [scrollProgress, setScrollProgress] = useState(0);
     
+    // State untuk UI Modal/Popover Link Modern
+    const [linkModal, setLinkModal] = useState({
+        show: false,
+        url: '',
+        range: null // Menyimpan posisi seleksi teks kursor
+    });
+
     useEffect(() => {
         const handleScroll = () => {
             const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
@@ -40,6 +57,19 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
         return `${minutes} MIN READ`;
     };
 
+    const getThumbnailUrl = (thumbnailPath) => {
+    if (!thumbnailPath) return '/images/default.jpg';
+
+    if (
+        thumbnailPath.startsWith('http://') ||
+        thumbnailPath.startsWith('https://')
+    ) {
+        return thumbnailPath;
+    }
+
+    return `https://ocxvxbjimyqcgndxvnsk.supabase.co/storage/v1/object/public/article-images/${thumbnailPath.replace('thumbnails/', '')}`;
+};
+
     return (
         <MainLayout activePage="home">
             <Head title="Home | The Modern Broadsheet" />
@@ -58,20 +88,19 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                             ESTABLISHED 2024
                         </span>
 
-                        <h2 className="font-display-xl text-display-xl mb-6 font-bold leading-[1.1] tracking-[-0.02em]">
+                        <h2 className="font-headline-lg text-headline-lg md:text-headline-xl mb-4 font-bold leading-[1.2] tracking-normal">
                             A premier source for deep-dive journalism and breaking news, curated for the modern reader.
                         </h2>
-                        
-                        <p className="font-body-lg text-body-lg max-w-xl mb-8 leading-relaxed opacity-90">
+                                                
+                        <p className="font-body-sm text-body-sm max-w-md mb-6 leading-relaxed opacity-80">
                             Investigating the stories that shape our world with intellectual rigor and uncompromising clarity. We bring you the pulse of global affairs, technology, and culture.
                         </p>
                         
                         <div className="flex gap-4">
-                            <button className="bg-zinc-900 text-white dark:bg-on-secondary dark:text-zinc-900 px-8 py-4 font-label-caps text-label-caps hover:bg-secondary dark:hover:bg-secondary transition-colors duration-300 uppercase tracking-widest font-bold cursor-pointer">
-                                Read Today's Edition
-                            </button>
-                            <button className="border border-zinc-700 text-zinc-700 dark:border-zinc-300 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-300 px-8 py-4 font-label-caps text-label-caps uppercase tracking-widest font-bold cursor-pointer">
-                                Browse Archives
+                            <button
+                                onClick={articlePages}
+                                className="border border-zinc-700 text-zinc-700 dark:border-zinc-300 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-on-secondary dark:hover:text-primary transition-colors duration-300 px-8 py-4 font-label-caps text-label-caps uppercase tracking-widest font-bold cursor-pointer">
+                                Read Article
                             </button>
                         </div>
                     </div>
@@ -85,16 +114,80 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                             />
                         </div>
                         {/* Floating Choice Box */}
-                        <div className="absolute -bottom-6 -left-6 bg-surface p-6 shadow-sm border border-outline-variant hidden xl:block max-w-[240px]">
-                            <span className="font-label-caps text-[10px] text-secondary font-bold uppercase tracking-[0.2em]">
+                        <div className="absolute bottom-2 left-2 xl:-bottom-6 xl:-left-6 bg-surface dark:bg-primary p-3 xl:p-6 shadow-sm border border-outline-variant max-w-[170px] xl:max-w-[240px]">
+                            <span className="font-label-caps text-[8px] xl:text-[10px] text-secondary dark:text-amber-500 font-bold uppercase tracking-[0.15em] xl:tracking-[0.2em]">
                                 EDITORIAL CHOICE
                             </span>
-                            <p className="text-primary font-display-xl text-[18px] mt-2 italic leading-tight font-semibold">
+                            <p className="text-primary dark:text-on-secondary font-display-xl text-[12px] xl:text-[18px] mt-1 xl:mt-2 italic leading-tight font-semibold">
                                 "The architecture of modern truth requires a new lens."
                             </p>
                         </div>
                     </div>
                 </section>
+                {hasFeatured && (
+                        <div className="mb-16 border-4 border-double border-outline-variant dark:border-zinc-800 p-6 bg-zinc-50 dark:bg-zinc-900/30 group">
+                            <Link
+                                href={`/articles/${featuredArticle.slug}`}
+                                className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
+                            >
+                                <div className="md:col-span-7 aspect-[16/9] overflow-hidden border border-outline-variant/30 bg-surface-container">
+                                    <img
+                                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-102"
+                                        src={getThumbnailUrl(featuredArticle.thumbnail)}
+                                        alt={featuredArticle.title}
+                                    />
+                                </div>
+
+                                <div className="md:col-span-5 flex flex-col justify-center">
+                                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.25em] mb-3 block">
+                                        ✦ Editor's Choice / Headline
+                                    </span>
+
+                                    <h2 className="font-display-xl text-3xl md:text-4xl font-serif mb-4 uppercase leading-tight">
+                                        {featuredArticle.title}
+                                    </h2>
+
+                                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6 line-clamp-3 text-justify">
+                                        {featuredArticle.excerpt}
+                                    </p>
+                                </div>
+                            </Link>
+                        </div>
+                    )}
+                {otherFeatured?.length > 0 && (
+                    <section className="pb-section-gap">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {otherFeatured.map((article) => (
+                                <article
+                                    key={article.id}
+                                    className="group cursor-pointer"
+                                >
+                                    <Link href={`/articles/${article.slug}`}>
+                                        <div className="aspect-[16/9] overflow-hidden border border-outline-variant/30 bg-surface-container mb-4">
+                                            <img
+                                                src={getThumbnailUrl(article.thumbnail)}
+                                                alt={article.title}
+                                                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                                            />
+                                        </div>
+
+                                        <span className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] block mb-2">
+                                            Featured Story
+                                        </span>
+
+                                        <h3 className="font-headline-md text-lg leading-tight mb-2 group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors">
+                                            {article.title}
+                                        </h3>
+
+                                        <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                                            {article.excerpt}
+                                        </p>
+                                    </Link>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Featured Highlights */}
                 <section className="py-section-gap">
@@ -108,13 +201,9 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                             <article className="col-span-12 lg:col-span-8 group cursor-pointer">
                                 <Link href={`/articles/${mainHighlight.slug}`}>
                                     <div className="aspect-[16/9] overflow-hidden mb-6 border border-outline-variant bg-surface-container">
-                                        <img 
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 grayscale group-hover:grayscale-0" 
-                                            src={mainHighlight.thumbnail 
-                                                ? (mainHighlight.thumbnail.startsWith('http') 
-                                                    ? mainHighlight.thumbnail 
-                                                    : `${mainHighlight.thumbnail}`) 
-                                                : '/images/default.jpg'} 
+                                        <img
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 grayscale group-hover:grayscale-0"
+                                            src={getThumbnailUrl(mainHighlight.thumbnail)}
                                             alt={mainHighlight.title}
                                         />
                                     </div>
@@ -126,7 +215,7 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                                             {calculateMinRead(mainHighlight)}
                                         </span>
                                     </div>
-                                    <h4 className="font-headline-lg text-headline-lg mb-4 group-hover:text-secondary transition-colors uppercase">
+                                    <h4 className="font-headline-lg text-headline-lg mb-4 group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors uppercase">
                                         {mainHighlight.title}
                                     </h4>
                                     <p className="font-body-md text-body-md text-slate-700 dark:text-zinc-400 line-clamp-3">
@@ -137,19 +226,19 @@ export default function Home({ mainHighlight, sideHighlights = [] }) {
                         )}
 
                         {/* Side Highlights (Dinamis) */}
-                        <div className="col-span-12 lg:col-span-4 flex flex-col gap-10">
+                        <div className="col-span-12 lg:col-span-4 flex flex-col gap-10 border-l-0 md:border-l border-outline-variant pl-0 md:pl-gutter pb-6 md:pb-0 border-b md:border-b-0 mb-6 md:mb-0">
                             {sideHighlights.map((item) => (
                                 <article key={item.id} className="group cursor-pointer border-b border-outline-variant pb-8 last:border-0 last:pb-0">
                                     <Link href={`/articles/${item.slug}`}>
                                         <div className="flex gap-4 mb-2 items-center">
-                                            <span className="font-label-caps text-label-caps text-secondary uppercase font-bold">
+                                            <span className="font-label-caps text-label-caps text-secondary dark:text-amber-500 uppercase font-bold">
                                                 {item.category?.name}
                                             </span>
                                             <span className="font-label-caps text-label-caps opacity-60 tracking-wider">
                                                 {calculateMinRead(item)}
                                             </span>
                                         </div>
-                                        <h5 className="font-headline-md text-headline-md mb-2 group-hover:text-secondary transition-colors leading-tight uppercase">
+                                        <h5 className="font-headline-md text-headline-md mb-2 group-hover:text-secondary dark:group-hover:text-amber-500 transition-colors leading-tight uppercase">
                                             {item.title}
                                         </h5>
                                         <p className="font-body-md text-body-md text-slate-700 dark:text-zinc-400 line-clamp-3">

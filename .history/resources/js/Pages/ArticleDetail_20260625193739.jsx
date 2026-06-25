@@ -616,7 +616,7 @@ function CommentItem({ comment, auth }) {
                                 </span>
                             )}
                         </div>
-                        <span className="text-slate-400 dark:text-comment-sec text-[10px] md:text-[11px] flex-shrink-0">
+                        <span className="text-slate-400 dark:text-surface-tint text-[10px] md:text-[11px] flex-shrink-0">
                             {new Date(comment.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                     </div>
