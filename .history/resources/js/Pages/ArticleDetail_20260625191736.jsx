@@ -671,7 +671,7 @@ function CommentItem({ comment, auth }) {
 
             {/* Menata duplikasi komponen penengah komentar dalam sirkuit rotasi balasan terperinci pada simpul anak (Children) */}
             {comment.replies && comment.replies.length > 0 && (
-                <div className="mt-2 pl-2 md:pl-2 border-l border-primary/30 dark:border-on-secondary space-y-3">
+                <div className="mt-2 pl-4 md:pl-10 border-l border-primary/30 dark:border-on-secondary space-y-3">
                     {comment.replies.map(reply => (
                         <CommentItem key={reply.id} comment={reply} auth={auth} />
                     ))}

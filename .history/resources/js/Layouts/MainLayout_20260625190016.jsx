@@ -6,8 +6,6 @@ import axios from 'axios';
 export default function MainLayout({ children, activePage, categories = [] }) {
     // Fungsi: Mengelola state visibilitas (buka/tutup) menu navigasi pada tampilan perangkat seluler
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-    const [openMenu, setOpenMenu] = useState(false);
     
     // Fungsi: Menginisialisasi dan menyimpan preferensi tema (Terang/Gelap) dari penyimpanan lokal browser
     const [isDark, setIsDark] = useState(() => {
@@ -238,87 +236,64 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                         {/* Fungsi: Menyusun tata letak status akun dan identitas pengguna khusus perangkat Desktop */}
                         <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
                             {user ? (
-                                <div className="relative">
-                                    {/* Tombol Dropdown */}
-                                    <button
-                                        onClick={() => setOpenMenu(!openMenu)}
-                                        className="flex items-center gap-2 border border-zinc-300 dark:border-zinc-700 px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-                                    >
-                                        {user.role_id === 3 ? (
-                                            <span className="text-[8px] font-bold bg-secondary dark:bg-amber-600 text-on-secondary dark:text-primary px-1.5 py-0.5 rounded uppercase">
-                                                Super Admin
-                                            </span>
-                                        ) : user.role_id === 1 ? (
-                                            <span className="text-[8px] font-bold bg-secondary dark:bg-amber-500 text-on-secondary dark:text-primary px-1.5 py-0.5 rounded uppercase">
-                                                Admin
-                                            </span>
-                                        ) : null}
-
-                                        <span className="text-sm font-medium">
-                                            {user.name}
-                                        </span>
-
-                                        <svg
-                                            className={`w-4 h-4 transition-transform ${openMenu ? "rotate-180" : ""}`}
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
+                            <>
+                                {/* Fungsi: Memunculkan menu rahasia (Admin Panel) secara eksklusif hanya untuk pemegang Role ID 3 */}
+                                {user.role_id === 3 && (
+                                    <div className="flex items-center gap-3 border-r border-zinc-300 dark:border-zinc-700 pr-3">
+                                        <Link 
+                                            href="/admin/users" 
+                                            className="text-[10px] font-bold text-zinc-500 hover:text-secondary dark:hover:text-amber-500 uppercase tracking-widest transition-colors"
                                         >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M19 9l-7 7-7-7"
-                                            />
-                                        </svg>
-                                    </button>
+                                            Kelola User
+                                        </Link>
+                                        <Link 
+                                            href="/admin/suggestions" 
+                                            className="text-[10px] font-bold text-zinc-500 hover:text-secondary dark:hover:text-amber-500 uppercase tracking-widest transition-colors"
+                                        >
+                                            Inbox Saran
+                                        </Link>
+                                    </div>
+                                )}
 
-                                    {/* Isi Dropdown */}
-                                    {openMenu && (
-                                        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50">
-
-                                            {user.role_id === 3 && (
-                                                <>
-                                                    <Link
-                                                        href="/admin/users"
-                                                        className="block px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                                    >
-                                                        Kelola User
-                                                    </Link>
-
-                                                    <Link
-                                                        href="/admin/suggestions"
-                                                        className="block px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                                    >
-                                                        Inbox Saran
-                                                    </Link>
-                                                </>
-                                            )}
-
-                                            {[1, 3].includes(user.role_id) && (
-                                                <Link
-                                                    href="/create"
-                                                    className="block px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                                >
-                                                    + Write Story
-                                                </Link>
-                                            )}
-
-                                            <div className="border-t border-zinc-200 dark:border-zinc-700" />
-
-                                            <Link
-                                                href={route("logout")}
-                                                method="post"
-                                                as="button"
-                                                className="block w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                            >
-                                                Logout
-                                            </Link>
-                                        </div>
-                                    )}
+                                {/* Fungsi: Mencetak identitas lencana tingkat kewenangan (Badge) berdampingan dengan nama profil */}
+                                <div className="flex items-center gap-2 border-r border-zinc-300 dark:border-zinc-700 pr-3">
+                                    {user.role_id === 3 ? (
+                                        <span className="text-[8px] font-bold bg-secondary dark:bg-amber-600 text-on-secondary dark:text-primary px-1.5 py-0.5 rounded-sm uppercase tracking-widest">
+                                            Super Admin
+                                        </span>
+                                    ) : user.role_id === 1 ? (
+                                        <span className="text-[8px] font-bold bg-secondary dark:bg-amber-500 text-on-secondary dark:text-primary px-1.5 py-0.5 rounded-sm uppercase tracking-widest">
+                                            Admin
+                                        </span>
+                                    ) : null}
+                                    <span className="text-sm font-medium uppercase tracking-tighter italic truncate max-w-[120px]">
+                                        {user.name}
+                                    </span>
                                 </div>
+
+                                {/* Fungsi: Mengamankan hak rute akses pengajuan tulisan artikel murni untuk jajaran editorial */}
+                                {[1, 3].includes(user.role_id) && (
+                                    <Link 
+                                        href="/create" 
+                                        className="bg-primary dark:bg-on-secondary text-white dark:text-primary px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase hover:bg-secondary dark:hover:bg-amber-500 transition-all"
+                                    >
+                                        + Write Story
+                                    </Link>
+                                )}
+
+                                {/* Fungsi: Menyediakan rute fungsional untuk mengakhiri sesi autentikasi */}
+                                <Link 
+                                    href={route('logout')} 
+                                    method="post" 
+                                    as="button" 
+                                    className="text-sm font-medium hover:text-red-600 transition-colors cursor-pointer ml-1"
+                                >
+                                    Logout
+                                </Link>
+                            </>
                             ) : (
-                                <a
+                                // Fungsi: Memunculkan rute formulir masuk bagi pengunjung tak dikenal (Tamu)
+                                <a 
                                     href="/login"
                                     className="font-bold text-[11px] hover:text-secondary dark:hover:text-amber-500 tracking-widest uppercase italic cursor-pointer pl-4 border-l border-zinc-300 dark:border-zinc-700"
                                 >

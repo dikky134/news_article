@@ -595,7 +595,7 @@ function CommentItem({ comment, auth }) {
     };
 
     return (
-        <div className="flex flex-col gap-3 md:gap-4 p-4 md:p-6 bg-surface-variant dark:bg-zinc-900/50  mb-3">
+        <div className="flex flex-col gap-3 md:gap-4 p-4 md:p-6 bg-outline-variant dark:bg-zinc-900/50  mb-3">
             <div className="flex gap-3 md:gap-4">
                 {/* Menampilkan visual avatar default mengandalkan kompilasi 2 aksara depan dari identitas penyumbang */}
                 <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-300 dark:bg-zinc-700 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-zinc-300 uppercase">
@@ -671,7 +671,7 @@ function CommentItem({ comment, auth }) {
 
             {/* Menata duplikasi komponen penengah komentar dalam sirkuit rotasi balasan terperinci pada simpul anak (Children) */}
             {comment.replies && comment.replies.length > 0 && (
-                <div className="mt-2 pl-2 md:pl-2 border-l border-primary/30 dark:border-on-secondary space-y-3">
+                <div className="mt-2 pl-4 md:pl-10 border-l border-outline-variant/30 dark:border-zinc-800/50 space-y-3">
                     {comment.replies.map(reply => (
                         <CommentItem key={reply.id} comment={reply} auth={auth} />
                     ))}
