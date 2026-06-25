@@ -8,7 +8,7 @@ export default {
     theme: {
         extend: {
             "colors": {
-                    "comment-dark":"#282828",
+                    "comment-dark":"#28282",
                     "comment-sec" : "#C8C8C8",
                     "surface-container-low": "#f3f4f5",
                     "primary-fixed": "#e2e2e6",

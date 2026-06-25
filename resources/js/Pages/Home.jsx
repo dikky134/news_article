@@ -98,10 +98,6 @@ export default function Home({ mainHighlight, sideHighlights = [], featuredArtic
                         
                         <div className="flex gap-4">
                             <button
-                                className="bg-zinc-900 text-white dark:bg-on-secondary dark:text-zinc-900 px-8 py-4 font-label-caps text-label-caps hover:bg-secondary dark:hover:bg-amber-500 transition-colors duration-300 uppercase tracking-widest font-bold cursor-pointer">
-                                Read Today's Edition
-                            </button>
-                            <button
                                 onClick={articlePages}
                                 className="border border-zinc-700 text-zinc-700 dark:border-zinc-300 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-on-secondary dark:hover:text-primary transition-colors duration-300 px-8 py-4 font-label-caps text-label-caps uppercase tracking-widest font-bold cursor-pointer">
                                 Read Article

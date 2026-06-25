@@ -483,7 +483,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                                         method="post" 
                                         as="button" 
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className="w-full text-left py-2 text-red-600 dark:text-amber-600 font-medium"
+                                        className="w-full text-left py-2 text-red-600 font-medium"
                                     >
                                         Logout
                                     </Link>
