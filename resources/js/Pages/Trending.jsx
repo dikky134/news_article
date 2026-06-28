@@ -133,7 +133,7 @@ export default function Trending({ trendingArticles = [], stats }) {
                                                 </span>
                                                 <span className="flex items-center gap-1.5 font-label-caps text-[11px]">
                                                     <span className="material-symbols-outlined text-[16px] md:text-[18px]">visibility</span>
-                                                    {mainFeature.views_count || 0} VIEWS
+                                                    {mainFeature.calculated_views_count || 0} VIEWS
                                                 </span>
                                                 <span className="flex items-center gap-1.5 font-label-caps text-[11px]">
                                                     <span className="material-symbols-outlined text-[16px] md:text-[18px]">mode_comment</span> 
@@ -177,7 +177,7 @@ export default function Trending({ trendingArticles = [], stats }) {
                                                             </span>
                                                             <span className="flex items-center gap-1 font-label-caps text-[11px]">
                                                                 <span className="material-symbols-outlined text-sm">visibility</span> 
-                                                                {item.views_count?.toLocaleString() || 0}
+                                                                {item.calculated_views_count?.toLocaleString() || 0}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -220,7 +220,7 @@ export default function Trending({ trendingArticles = [], stats }) {
                                             </div>
                                             <span className="flex items-center gap-1 font-label-caps text-[11px]">
                                                 <span className="material-symbols-outlined text-sm">visibility</span> 
-                                                {item.views_count?.toLocaleString() || 0}
+                                                {item.calculated_views_count?.toLocaleString() || 0}
                                             </span>
                                             <span className="material-symbols-outlined text-primary dark:text-on-secondary text-lg md:text-xl">arrow_forward</span>
                                         </div>

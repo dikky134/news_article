@@ -4,16 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\ArticleView;
+use App\Models\Category;
 use Inertia\Inertia;
 
 class TrendingController extends Controller
 {
     public function index()
     {
-        $trendingArticles = \App\Models\Article::with(['category', 'user'])
-            ->withCount('views', 'comments')
+        $trendingArticles = Article::with(['category', 'user'])
+            ->withCount([
+                'views as calculated_views_count', 
+                'comments'
+            ])
             ->where('status', 'published')
-            ->orderBy('articles.views_count', 'desc')
+            ->orderBy('calculated_views_count', 'desc')
             ->limit(7)
             ->get();
         
@@ -35,7 +39,8 @@ class TrendingController extends Controller
             ? number_format($totalReaders / 1000000, 1) . 'M' 
             : ($totalReaders >= 1000 ? number_format($totalReaders / 1000, 1) . 'K' : $totalReaders);
 
-        // 2. Rata-rata Waktu Baca (Mengambil rata-rata dari semua konten artikel)
+        // 2. Rata-rata Waktu Baca 
+        // OPTIMASI: Menggunakan chunking atau membatasi data jika artikel sudah sangat banyak di masa depan
         $allArticles = Article::select('content')->get();
         $totalMinutes = $allArticles->sum(function($article) {
             $words = str_word_count(strip_tags($article->content));
@@ -43,8 +48,8 @@ class TrendingController extends Controller
         });
         $avgReadTime = $allArticles->count() > 0 ? round($totalMinutes / $allArticles->count(), 1) : 0;
 
-        // 3. Jumlah Negara atau Kategori (Misal kita pakai jumlah kategori yang aktif)
-        $countriesCount = \App\Models\Category::count();
+        // 3. Jumlah Kategori yang aktif
+        $countriesCount = Category::count();
 
         return Inertia::render('Trending', [
             'trendingArticles' => $trendingArticles,
@@ -52,7 +57,7 @@ class TrendingController extends Controller
                 'readers' => $formattedReaders,
                 'avgTime' => $avgReadTime . 'm',
                 'countries' => $countriesCount,
-                'accuracy' => '99.9%' // Ini bisa tetap statis sebagai branding
+                'accuracy' => '99.9%' // Branding static
             ]
         ]);
     }

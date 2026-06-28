@@ -196,8 +196,16 @@ class ArticleController extends Controller
 
     public function index(Request $request)
     {
-        $search = trim($request->input('search'));
         $categorySlug = $request->string('category')->trim();
+        
+        // JIKA KATEGORI DIKLIK (Ada isi string category), ABARKAN DAN HAPUS PENCARIAN
+        if ($categorySlug->isNotEmpty()) {
+            $search = '';
+        } else {
+            $search = trim($request->input('search'));
+        }
+        
+        $dateFilter = $request->input('date');
         
         $query = Article::query()
             ->with(['category', 'user'])
@@ -206,16 +214,20 @@ class ArticleController extends Controller
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
                 $q->where('title', 'LIKE', "%{$search}%")
-                ->orWhere('content', 'LIKE', "%{$search}%")
-                ->orWhere('excerpt', 'LIKE', "%{$search}%");
+                  ->orWhere('content', 'LIKE', "%{$search}%")
+                  ->orWhere('excerpt', 'LIKE', "%{$search}%");
             });
-        }  
+        }   
 
         // Logika Filter Kategori
         if ($categorySlug->isNotEmpty()) {
             $query->whereHas('category', function($q) use ($categorySlug) {
                 $q->where('slug', $categorySlug);
             });
+        }
+        
+        if(!empty($dateFilter)) {
+            $query->whereDate('created_at', $dateFilter);
         }
         
         // Logika Filter Tanggal
@@ -229,7 +241,8 @@ class ArticleController extends Controller
             'articles'         => $articles,
             'categories'       => Category::select('id', 'name', 'slug')->get(),
             'filters'          => [
-                'search'   => $search,
+                // Mengirim null balik ke frontend agar input text di search bar ikut bersih otomatis
+                'search'   => !empty($search) ? $search : null,
                 'category' => $categorySlug->isNotEmpty() ? $categorySlug->toString() : null,
                 'date'     => $request->input('date')
             ],

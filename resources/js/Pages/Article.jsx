@@ -32,7 +32,7 @@ export default function Article({articles = [], filters = {}, categories = [], f
     }, [articles]);
 
     useEffect(() => {
-    setSelectedDate(filters.date || '');
+        setSelectedDate(filters.date || '');
     }, [filters.date]);
 
     useEffect(() => {
@@ -53,9 +53,8 @@ export default function Article({articles = [], filters = {}, categories = [], f
     console.log("Filters aktif:", filters);
     console.log("Jumlah artikel diterima:", articles.length);
     
-    // --- PERBAIKAN LOGIKA FILTER (Mendukung Clear Filter secara Absolut di URL) ---
+    // --- LOGIKA FILTER UMUM ---
     const handleFilterChange = (key, value) => {
-        // Ambil filter yang sedang aktif saat ini dari url / props
         let newFilters = { ...filters };
 
         if (key === 'RESET_ALL') {
@@ -66,27 +65,39 @@ export default function Article({articles = [], filters = {}, categories = [], f
             newFilters[key] = value;
         }
 
-        // Jalankan request ke backend secara bersih
         router.get('/articles', newFilters, { 
-            preserveState: false, // 💡 Diubah jadi false agar data fresh dari backend langsung masuk
+            preserveState: false, 
             replace: true 
+        });
+    };
+
+    // --- LOGIKA KHUSUS KLIK KATEGORI (MENGHAPUS LOGIKA PENCARIAN) ---
+    const handleCategoryClick = (categorySlug) => {
+        router.get('/articles', {
+            category: categorySlug || '',
+            search: '',
+            date: filters.date || null,
+            _t: Date.now()
+        }, {
+            preserveState: false,
+            replace: true
         });
     };
 
     // --- FUNGSI PEMBANTU UNTUK RESOLUSI URL GAMBAR ---
     const getThumbnailUrl = (thumbnailPath) => {
-    if (!thumbnailPath) return '';
+        if (!thumbnailPath) return '';
 
-    if (
-        thumbnailPath.startsWith('http://') ||
-        thumbnailPath.startsWith('https://')
-    ) {
-        return thumbnailPath;
-    }
+        if (
+            thumbnailPath.startsWith('http://') ||
+            thumbnailPath.startsWith('https://')
+        ) {
+            return thumbnailPath;
+        }
 
-    console.log("visibleCount =", visibleCount);
-    return `https://ocxvxbjimyqcgndxvnsk.supabase.co/storage/v1/object/public/article-images/${thumbnailPath.replace('thumbnails/', '')}`;
-};
+        console.log("visibleCount =", visibleCount);
+        return `https://ocxvxbjimyqcgndxvnsk.supabase.co/storage/v1/object/public/article-images/${thumbnailPath.replace('thumbnails/', '')}`;
+    };
 
     return (
         <MainLayout activePage={(typeof filters.category === 'object' ? filters.category?.slug : filters.category) || "articles"}>
@@ -105,7 +116,7 @@ export default function Article({articles = [], filters = {}, categories = [], f
                     <div className="flex justify-between items-end mb-10">
                         <div>
                             <span className="font-label-caps text-secondary dark:text-amber-500 block mb-4 uppercase tracking-[0.3em] text-[12px]">
-                                Archive Edition — {new Date().getFullYear()}
+                                Archive Edition â€” {new Date().getFullYear()}
                             </span>
                             <h1 className="font-display-xl text-headline-lg md:text-6xl max-w-4xl leading-tight uppercase italic">
                                 {filters.category 
@@ -137,7 +148,8 @@ export default function Article({articles = [], filters = {}, categories = [], f
                                         <div className="block md:hidden w-full">
                                             <select
                                                 value={filters.category || ''}
-                                                onChange={(e) => handleFilterChange('category', e.target.value)}
+                                                // ðŸ’¡ Diubah menggunakan handleCategoryClick
+                                                onChange={(e) => handleCategoryClick(e.target.value)}
                                                 className="w-full bg-surface dark:bg-[#1e1e1e] border border-outline-variant dark:border-zinc-800 px-4 py-3 font-label-caps text-[12px] uppercase tracking-wider text-primary dark:text-white focus:outline-none focus:border-primary dark:focus:border-amber-500 rounded-none appearance-none cursor-pointer bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:10px_auto] bg-[right_16px_center] bg-no-repeat"
                                             >
                                                 <option value="">ALL TOPICS</option>
@@ -152,7 +164,8 @@ export default function Article({articles = [], filters = {}, categories = [], f
                                         {/* 2. TAMPILAN DESKTOP */}
                                         <div className="hidden md:flex flex-wrap gap-2">
                                             <button
-                                                onClick={() => handleFilterChange('category', '')}
+                                                // ðŸ’¡ Diubah menggunakan handleCategoryClick
+                                                onClick={() => handleCategoryClick('')}
                                                 className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 ${
                                                     !filters.category 
                                                         ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' 
@@ -165,7 +178,8 @@ export default function Article({articles = [], filters = {}, categories = [], f
                                             {sortedCategories.map((cat) => (
                                                 <button
                                                     key={cat.id}
-                                                    onClick={() => handleFilterChange('category', cat.slug)}
+                                                    // ðŸ’¡ Diubah menggunakan handleCategoryClick
+                                                    onClick={() => handleCategoryClick(cat.slug)}
                                                     className={`px-5 py-2 font-label-caps text-[11px] border transition-all duration-300 uppercase ${
                                                         filters.category === cat.slug 
                                                             ? 'bg-primary dark:bg-on-secondary text-white dark:text-primary border-primary' 
@@ -194,12 +208,11 @@ export default function Article({articles = [], filters = {}, categories = [], f
                                     <input
                                         type="date"
                                         value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
-                                        // onBlur={() => {
-                                        //     if (selectedDate && selectedDate !== filters.date) {
-                                        //         handleFilterChange('date', selectedDate);
-                                        //     }
-                                        // }}
+                                        onChange={(e) => {
+                                            const targetDate = e.target.value;
+                                            setSelectedDate(targetDate);
+                                            handleFilterChange('date', targetDate);
+                                        }}
                                         className="border border-outline-variant dark:border-zinc-700 px-3 py-1.5 text-xs font-body-md text-slate-800 dark:text-white focus:outline-secondary bg-transparent [color-scheme:light] dark:[color-scheme:dark]"
                                     />
                                 </div>
@@ -311,7 +324,6 @@ export default function Article({articles = [], filters = {}, categories = [], f
                         ))}
                     </div>
                 ) : (
-                    /* --- PERBAIKAN: TOMBOL RESET CLEAR FILTER DISINI --- */
                     <div className="py-24 text-center border border-dashed border-outline-variant">
                         <p className="font-display-md text-on-surface-variant">No articles found in this landscape.</p>
                         <button 
