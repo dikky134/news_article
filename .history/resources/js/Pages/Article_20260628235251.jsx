@@ -55,21 +55,22 @@ export default function Article({articles = [], filters = {}, categories = [], f
     
     // --- PERBAIKAN LOGIKA FILTER (Mendukung Clear Filter secara Absolut di URL) ---
     const handleFilterChange = (key, value) => {
-        // Ambil filter yang sedang aktif saat ini dari url / props
         let newFilters = { ...filters };
 
         if (key === 'RESET_ALL') {
+            // Jika memicu clear filter total, kosongkan objek filter seutuhnya
             newFilters = {};
         } else if (!value || value === '') {
+            // Pastikan properti dihapus total agar tidak dikirim sebagai string kosong ke backend
             delete newFilters[key];
         } else {
             newFilters[key] = value;
         }
 
-        // Jalankan request ke backend secara bersih
+        // Paksa Inertia melakukan request ulang ke URL bersih tanpa membawa query parameter usang
         router.get('/articles', newFilters, { 
-            preserveState: false, // 💡 Diubah jadi false agar data fresh dari backend langsung masuk
-            replace: true 
+            preserveState: true,
+            replace: true // Mencegah penumpukan riwayat history back browser yang rusak
         });
     };
 
