@@ -205,9 +205,11 @@ class ArticleController extends Controller
             
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
-                $q->where('title', 'LIKE', "%{$search}%");
+                $q->where('title', 'LIKE', "%{$search}%")
+                ->orWhere('content', 'LIKE', "%{$search}%")
+                ->orWhere('excerpt', 'LIKE', "%{$search}%");
             });
-        }   
+        }  
 
         // Logika Filter Kategori
         if ($categorySlug->isNotEmpty()) {

@@ -73,6 +73,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
     const [isSearching, setIsSearching] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const searchContainerRef = useRef(null);
+    const mobileSearchContainerRef = useRef(null);
 
     // Fungsi: Memproses penelusuran API secara real-time dengan menunda eksekusi (debounce) selama 300ms
     useEffect(() => {
@@ -102,14 +103,18 @@ export default function MainLayout({ children, activePage, categories = [] }) {
 
     // Fungsi: Menutup kotak hasil pencarian secara otomatis jika pengguna mengklik area luar elemen
     useEffect(() => {
-        function handleClickOutside(event) {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-                setShowDropdown(false);
-            }
+    function handleClickOutside(event) {
+        // Memastikan klik tidak berada di kontainer desktop DAN tidak di kontainer mobile
+        const clickedOutsideDesktop = searchContainerRef.current && !searchContainerRef.current.contains(event.target);
+        const clickedOutsideMobile = mobileSearchContainerRef.current && !mobileSearchContainerRef.current.contains(event.target);
+
+        if (clickedOutsideDesktop && clickedOutsideMobile) {
+            setShowDropdown(false);
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
 
     // Fungsi: Mengarahkan pengguna menuju halaman indeks artikel menggunakan query pencarian saat form di-submit
     const handleSearch = (e) => {
@@ -358,7 +363,7 @@ export default function MainLayout({ children, activePage, categories = [] }) {
                     <div className="lg:hidden absolute top-full left-0 w-full bg-surface dark:bg-[#121212] border-b border-outline-variant dark:border-zinc-800 px-6 py-6 shadow-xl space-y-4 z-50">
                         
                         {/* Fungsi: Menyediakan modul formulir penelusuran versi vertikal */}
-                        <div className="relative w-full mb-4">
+                        <div ref={mobileSearchContainerRef} className="relative w-full mb-4">
                             <form onSubmit={handleSearch}>
                                 <input 
                                     className="w-full bg-transparent border-b border-outline px-2 py-2 text-sm dark:border-zinc-700 dark:text-white" 
