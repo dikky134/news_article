@@ -24,6 +24,9 @@ return new class extends Migration
 
             $table->text('content');
 
+            // $table->timestamp('created_at');
+            // $table->timestamp('updated_at');
+            
             $table->timestamps();
         });
     }

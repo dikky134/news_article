@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ArticleView extends Model
 {
+    use HasFactory;
     protected $table = 'article_views';
 
     // Matikan timestamps Laravel karena tabelmu hanya punya created_at

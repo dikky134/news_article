@@ -14,10 +14,14 @@ return new class extends Migration
         Schema::create('articles', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id');
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
 
             $table->foreignId('category_id')
-                ->nullable();
+                ->nullable()
+                ->constrained('categories')
+                ->nullOnDelete();
 
             $table->string('title');
             $table->string('slug')->unique();
@@ -38,6 +42,9 @@ return new class extends Migration
             $table->timestamp('published_at')->nullable();
 
             $table->unsignedInteger('views_count')->default(0);
+
+            // $table->timestamp('created_at');
+            // $table->timestamp('updated_at');
 
             $table->timestamps();
         });

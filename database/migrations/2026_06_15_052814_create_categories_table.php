@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug');
+            // $table->timestamp('created_at');
+            // $table->timestamp('updated_at');
             $table->timestamps();
         });
     }
