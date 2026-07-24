@@ -11,18 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('article_views', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('article_id')
-                ->constrained('articles')
+        Schema::table('articles', function (Blueprint $table) {
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
                 ->cascadeOnDelete();
 
-            $table->foreignId('user_id')
-                ->nullable()
-                ->constrained('users')
+            $table->foreign('category_id')
+                ->references('id')
+                ->on('categories')
                 ->nullOnDelete();
-            $table->string('ip_address', 45)->nullable();
-            $table->timestamps();
         });
     }
 
@@ -31,6 +29,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('article_views');
+        Schema::table('articles', function (Blueprint $table) {
+            //
+        });
     }
 };
